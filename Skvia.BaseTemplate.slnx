@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/Skvia.BaseTemplate.AppHost/Skvia.BaseTemplate.AppHost.csproj" Id="7987d5d3-f73d-443f-9bf6-ace12bc8b196" />
+    <Project Path="aspire/Skvia.BaseTemplate.ServiceDefaults/Skvia.BaseTemplate.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Skvia.BaseTemplate.Api/Skvia.BaseTemplate.Api.csproj" />
+    <Project Path="src/Skvia.BaseTemplate.Application/Skvia.BaseTemplate.Application.csproj" Id="81db21e7-688a-412d-ad6e-babbbe5e7758" />
+    <Project Path="src/Skvia.BaseTemplate.Domain/Skvia.BaseTemplate.Domain.csproj" Id="386ab27e-e7f9-4a20-bb53-35d1c709bfa9" />
+    <Project Path="src/Skvia.BaseTemplate.Infrastructure/Skvia.BaseTemplate.Infrastructure.csproj" Id="4cc89fde-119a-43eb-ad2a-46fbb0771464" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Skvia.BaseTemplate.Application.Tests/Skvia.BaseTemplate.Application.Tests.csproj" />
+    <Project Path="tests/Skvia.BaseTemplate.Domain.Tests/Skvia.BaseTemplate.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
