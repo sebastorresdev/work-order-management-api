@@ -14,9 +14,11 @@ public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
             return EmployeeErrors.NotFound;
         }
 
-        var documentIdentifier = DocumentIdentifier.Create(command.DocumentType, command.DocumentNumber);
+        var docResult = DocumentIdentifier.Create(command.DocumentType, command.DocumentNumber);
+        if (docResult.IsError) return docResult.Errors;
 
-        // Check for duplicate document number if it's being changed and belongs to another employee
+        var documentIdentifier = docResult.Value;
+
         if (employee.DocumentIdentifier.Type != documentIdentifier.Type || employee.DocumentIdentifier.Number != documentIdentifier.Number)
         {
             if (await dbContext.Employees.AnyAsync(e => e.DocumentIdentifier.Type == documentIdentifier.Type && e.DocumentIdentifier.Number == documentIdentifier.Number && e.Id != command.Id, cancellationToken))
@@ -25,7 +27,7 @@ public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
             }
         }
 
-        employee.Update(
+        var updateResult = employee.Update(
             command.Code,
             command.FirstName,
             command.LastName,
@@ -37,9 +39,10 @@ public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
             command.Department,
             command.PhotoUrl);
 
+        if (updateResult.IsError) return updateResult.Errors;
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }
 }
-

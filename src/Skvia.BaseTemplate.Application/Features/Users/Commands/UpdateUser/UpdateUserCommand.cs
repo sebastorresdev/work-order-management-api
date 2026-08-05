@@ -1,5 +1,8 @@
+using Skvia.BaseTemplate.Application.Common.Security;
+
 namespace Skvia.BaseTemplate.Application.Features.Users.Commands.UpdateUser;
 
+[HasPermission(Permission.User.Edit)]
 public record UpdateUserCommand(
     Guid UserId,
     string UserName,
@@ -10,4 +13,3 @@ public record UpdateUserCommand(
     string? PhotoUrl,
     List<Guid> BranchIds,
     List<Guid> RoleIds) : ICommand<ErrorOr<Success>>;
-

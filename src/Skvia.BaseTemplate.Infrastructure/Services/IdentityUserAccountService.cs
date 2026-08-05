@@ -185,21 +185,19 @@ public class IdentityUserAccountService(
 
         if (command.NewPassword != command.ConfirmNewPassword)
         {
-            return Error.Conflict("Las contraseñas no coinciden.");
+            return Error.Validation("User.PasswordMismatch", "Las contraseñas no coinciden.");
         }
 
         IdentityResult removeResult = await userManager.RemovePasswordAsync(user);
         if (!removeResult.Succeeded)
         {
-            var errors = string.Join("; ", removeResult.Errors.Select(e => e.Description));
-            return Error.Conflict($"No se pudo eliminar la contraseña actual: {errors}");
+            return removeResult.ToApplicationError();
         }
 
         IdentityResult addResult = await userManager.AddPasswordAsync(user, command.NewPassword);
         if (!addResult.Succeeded)
         {
-            var errors = string.Join("; ", addResult.Errors.Select(e => e.Description));
-            return Error.Conflict($"No se pudo asignar la nueva contraseña: {errors}");
+            return addResult.ToApplicationError();
         }
 
         return Result.Success;

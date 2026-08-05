@@ -39,11 +39,27 @@ internal class IdentityRoleService(
 
     public async Task<ErrorOr<Success>> DeleteRoleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
     {
-        var roleAdmin = await roleManager.FindByNameAsync(Roles.Administrator) ?? throw new ApplicationException("No se pudo encontrar el rol de administrador.");
+        var roleAdmin = await roleManager.FindByNameAsync(Roles.Administrator);
+        if (roleAdmin is null)
+        {
+            return Error.NotFound("Role.AdminNotFound", "No se pudo encontrar el rol de administrador.");
+        }
 
         if (command.RoleIds.Contains(roleAdmin.Id))
         {
             return Error.Validation("Role.Delete.Administrator", "No se puede eliminar el rol de Administrador.");
+        }
+
+        var rolesWithUsers = await roleManager.Roles
+            .Where(r => command.RoleIds.Contains(r.Id) && r.UserRoles.Any())
+            .Select(r => r.Name)
+            .ToListAsync(cancellationToken);
+
+        if (rolesWithUsers.Count > 0)
+        {
+            return Error.Conflict(
+                "Role.HasAssignedUsers",
+                $"No se puede eliminar el rol '{rolesWithUsers.First()}' porque tiene usuarios asignados. Debe desasignar los usuarios primero.");
         }
 
         var affectedRows = await roleManager.Roles

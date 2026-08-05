@@ -20,11 +20,11 @@ public class UpdateBranchCommandHandler(IApplicationDbContext dbContext) : IComm
                .AnyAsync(b => b.Code == cleanNormalizedCode && b.Id != command.BranchId, cancellationToken))
             return BranchErrors.DuplicateBranch(command.Name);
 
-        branch.Update(cleanNormalizedCode, command.Name, command.Address);
+        var updateResult = branch.Update(cleanNormalizedCode, command.Name, command.Address);
+        if (updateResult.IsError) return updateResult.Errors;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }
 }
-

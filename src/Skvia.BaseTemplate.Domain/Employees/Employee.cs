@@ -1,6 +1,9 @@
+using ErrorOr;
+using Skvia.BaseTemplate.Domain.Common;
+
 namespace Skvia.BaseTemplate.Domain.Employees;
 
-public class Employee : BaseAuditableEntity
+public class Employee : BaseAuditableEntity, IArchivable
 {
     public string Code { get; private set; } = null!;
     public string FirstName { get; private set; } = null!;
@@ -12,10 +15,13 @@ public class Employee : BaseAuditableEntity
     public string? Department { get; private set; }
     public DateTimeOffset HireDate { get; private set; }
     public string? PhotoUrl { get; private set; }
+    public bool IsArchived { get; set; }
+    public DateTimeOffset? ArchivedAt { get; set; }
+    public Guid? ArchivedBy { get; set; }
 
     private Employee() { }
 
-    public static Employee Create(
+    public static ErrorOr<Employee> Create(
         string code,
         string firstName,
         string lastName,
@@ -27,31 +33,62 @@ public class Employee : BaseAuditableEntity
         string? department = null,
         string? photoUrl = null)
     {
-        var employee = new Employee();
+        List<Error> errors = [];
 
-        ArgumentNullException.ThrowIfNull(code);
-        ArgumentNullException.ThrowIfNull(firstName);
-        ArgumentNullException.ThrowIfNull(lastName);
+        if (string.IsNullOrWhiteSpace(code) || code.Length > EmployeeConstants.CodeMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.CodeInvalid", $"El código de empleado es requerido y no debe exceder {EmployeeConstants.CodeMaxLength} caracteres."));
+        }
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(code.Length, EmployeeConstants.CodeMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(firstName.Length, EmployeeConstants.FirstNameMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(lastName.Length, EmployeeConstants.LastNameMaxLength);
+        if (string.IsNullOrWhiteSpace(firstName) || firstName.Length > EmployeeConstants.FirstNameMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.FirstNameInvalid", $"El nombre es requerido y no debe exceder {EmployeeConstants.FirstNameMaxLength} caracteres."));
+        }
 
-        employee.Code = code.Trim().ToUpper();
-        employee.FirstName = firstName.Trim();
-        employee.LastName = lastName.Trim();
-        employee.DocumentIdentifier = documentIdentifier;
-        employee.HireDate = hireDate;
-        employee.Email = email != null ? Employees.Email.Create(email) : null;
-        employee.Phone = phone != null ? Employees.Phone.Create(phone) : null;
-        employee.Position = position?.Trim();
-        employee.Department = department?.Trim();
-        employee.PhotoUrl = photoUrl?.Trim();
+        if (string.IsNullOrWhiteSpace(lastName) || lastName.Length > EmployeeConstants.LastNameMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.LastNameInvalid", $"El apellido es requerido y no debe exceder {EmployeeConstants.LastNameMaxLength} caracteres."));
+        }
+
+        Email? emailVo = null;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var emailResult = Employees.Email.Create(email);
+            if (emailResult.IsError) errors.AddRange(emailResult.Errors);
+            else emailVo = emailResult.Value;
+        }
+
+        Phone? phoneVo = null;
+        if (!string.IsNullOrWhiteSpace(phone))
+        {
+            var phoneResult = Employees.Phone.Create(phone);
+            if (phoneResult.IsError) errors.AddRange(phoneResult.Errors);
+            else phoneVo = phoneResult.Value;
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        var employee = new Employee
+        {
+            Code = code.Trim().ToUpper(),
+            FirstName = firstName.Trim(),
+            LastName = lastName.Trim(),
+            DocumentIdentifier = documentIdentifier,
+            HireDate = hireDate,
+            Email = emailVo,
+            Phone = phoneVo,
+            Position = position?.Trim(),
+            Department = department?.Trim(),
+            PhotoUrl = photoUrl?.Trim()
+        };
 
         return employee;
     }
 
-    public void Update(
+    public ErrorOr<Success> Update(
         string code,
         string firstName,
         string lastName,
@@ -63,33 +100,55 @@ public class Employee : BaseAuditableEntity
         string? department = null,
         string? photoUrl = null)
     {
-        ArgumentNullException.ThrowIfNull(code);
-        ArgumentNullException.ThrowIfNull(firstName);
-        ArgumentNullException.ThrowIfNull(lastName);
+        List<Error> errors = [];
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(code.Length, EmployeeConstants.CodeMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(firstName.Length, EmployeeConstants.FirstNameMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(lastName.Length, EmployeeConstants.LastNameMaxLength);
+        if (string.IsNullOrWhiteSpace(code) || code.Length > EmployeeConstants.CodeMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.CodeInvalid", $"El código de empleado es requerido y no debe exceder {EmployeeConstants.CodeMaxLength} caracteres."));
+        }
+
+        if (string.IsNullOrWhiteSpace(firstName) || firstName.Length > EmployeeConstants.FirstNameMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.FirstNameInvalid", $"El nombre es requerido y no debe exceder {EmployeeConstants.FirstNameMaxLength} caracteres."));
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName) || lastName.Length > EmployeeConstants.LastNameMaxLength)
+        {
+            errors.Add(Error.Validation("Employee.LastNameInvalid", $"El apellido es requerido y no debe exceder {EmployeeConstants.LastNameMaxLength} caracteres."));
+        }
+
+        Email? emailVo = null;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var emailResult = Employees.Email.Create(email);
+            if (emailResult.IsError) errors.AddRange(emailResult.Errors);
+            else emailVo = emailResult.Value;
+        }
+
+        Phone? phoneVo = null;
+        if (!string.IsNullOrWhiteSpace(phone))
+        {
+            var phoneResult = Employees.Phone.Create(phone);
+            if (phoneResult.IsError) errors.AddRange(phoneResult.Errors);
+            else phoneVo = phoneResult.Value;
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
 
         Code = code.Trim().ToUpper();
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
         DocumentIdentifier = documentIdentifier;
         HireDate = hireDate;
-        Email = email != null ? Employees.Email.Create(email) : null;
-        Phone = phone != null ? Employees.Phone.Create(phone) : null;
+        Email = emailVo;
+        Phone = phoneVo;
         Position = position?.Trim();
         Department = department?.Trim();
         PhotoUrl = photoUrl?.Trim();
-    }
 
-    public void UpdateProfile(string? phone, string? position, string? department, string? photoUrl)
-    {
-        Phone = phone != null ? Employees.Phone.Create(phone) : null;
-        Position = position?.Trim();
-        Department = department?.Trim();
-        PhotoUrl = photoUrl?.Trim();
+        return Result.Success;
     }
-
 }
-

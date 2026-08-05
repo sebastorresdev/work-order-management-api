@@ -9,17 +9,19 @@ public class ValueObjectTests
     [InlineData("  test.name+alias@domain.co.uk  ", "test.name+alias@domain.co.uk")]
     public void Email_Create_ValidEmail_ReturnsEmailValueObject(string input, string expected)
     {
-        var email = Email.Create(input);
-        Assert.Equal(expected, email.Value);
+        var result = Email.Create(input);
+        Assert.False(result.IsError);
+        Assert.Equal(expected, result.Value.Value);
     }
 
     [Theory]
     [InlineData("invalid-email")]
     [InlineData("@domain.com")]
     [InlineData("user@")]
-    public void Email_Create_InvalidEmail_ThrowsArgumentException(string invalidEmail)
+    public void Email_Create_InvalidEmail_ReturnsError(string invalidEmail)
     {
-        Assert.Throws<ArgumentException>(() => Email.Create(invalidEmail));
+        var result = Email.Create(invalidEmail);
+        Assert.True(result.IsError);
     }
 
     [Theory]
@@ -27,16 +29,17 @@ public class ValueObjectTests
     [InlineData("123-456-7890", "123-456-7890")]
     public void Phone_Create_ValidPhone_ReturnsPhoneValueObject(string input, string expected)
     {
-        var phone = Phone.Create(input);
-        Assert.Equal(expected, phone.Value);
+        var result = Phone.Create(input);
+        Assert.False(result.IsError);
+        Assert.Equal(expected, result.Value.Value);
     }
 
     [Theory]
     [InlineData("abc")]
     [InlineData("123")]
-    public void Phone_Create_InvalidPhone_ThrowsArgumentException(string invalidPhone)
+    public void Phone_Create_InvalidPhone_ReturnsError(string invalidPhone)
     {
-        Assert.Throws<ArgumentException>(() => Phone.Create(invalidPhone));
+        var result = Phone.Create(invalidPhone);
+        Assert.True(result.IsError);
     }
 }
-

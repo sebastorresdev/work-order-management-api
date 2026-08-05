@@ -21,6 +21,9 @@ public static partial class Permission
 
         [PermissionInfo("Ver Sucursales", "Permite ver la lista de sucursales")]
         public const string View = "Permissions.Branches.View";
+
+        [PermissionInfo("Archivar Sucursal", "Permite archivar o desarchivar una sucursal")]
+        public const string Archive = "Permissions.Branches.Archive";
     }
 }
 

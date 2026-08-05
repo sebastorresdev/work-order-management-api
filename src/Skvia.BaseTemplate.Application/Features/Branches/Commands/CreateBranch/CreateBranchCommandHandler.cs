@@ -14,7 +14,10 @@ public class CreateBranchCommandHandler(IApplicationDbContext dbContext) : IComm
         if (branchExisting)
             return BranchErrors.DuplicateBranch(command.Code);
 
-        var branch = Branch.Create(command.Code, command.Name, command.Address);
+        var branchResult = Branch.Create(command.Code, command.Name, command.Address);
+        if (branchResult.IsError) return branchResult.Errors;
+
+        var branch = branchResult.Value;
 
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -22,4 +25,3 @@ public class CreateBranchCommandHandler(IApplicationDbContext dbContext) : IComm
         return branch.Id;
     }
 }
-

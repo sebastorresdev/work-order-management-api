@@ -21,6 +21,9 @@ public static partial class Permission
 
         [PermissionInfo("Eliminar Usuario", "Permite eliminar usuarios")]
         public const string Delete = "Permissions.Users.Delete";
+
+        [PermissionInfo("Archivar Usuario", "Permite archivar o desarchivar usuarios")]
+        public const string Archive = "Permissions.Users.Archive";
     }
 }
 

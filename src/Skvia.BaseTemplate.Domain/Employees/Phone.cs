@@ -1,10 +1,10 @@
 using System.Text.RegularExpressions;
+using ErrorOr;
 
 namespace Skvia.BaseTemplate.Domain.Employees;
 
 public readonly partial record struct Phone
 {
-    // A simple regex for phone numbers, allowing digits, spaces, hyphens, and plus signs.
     [GeneratedRegex(@"^\+?[\d\s-]{7,20}$")]
     private static partial Regex PhoneRegex();
 
@@ -15,15 +15,25 @@ public readonly partial record struct Phone
         Value = value;
     }
 
-    public static Phone Create(string phoneNumber)
+    public static Phone FromDb(string value) => new(value);
+
+    public static ErrorOr<Phone> Create(string phoneNumber)
     {
-        ArgumentNullException.ThrowIfNull(phoneNumber);
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            return Error.Validation("Phone.Empty", "El número de teléfono no puede estar vacío.");
+        }
+
         var trimmed = phoneNumber.Trim();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(trimmed.Length, EmployeeConstants.PhoneMaxLength);
+
+        if (trimmed.Length > EmployeeConstants.PhoneMaxLength)
+        {
+            return Error.Validation("Phone.TooLong", $"El número de teléfono excede los {EmployeeConstants.PhoneMaxLength} caracteres.");
+        }
 
         if (!PhoneRegex().IsMatch(trimmed))
         {
-            throw new ArgumentException("Invalid phone number format.", nameof(phoneNumber));
+            return Error.Validation("Phone.InvalidFormat", "El formato del teléfono es inválido.");
         }
 
         return new Phone(trimmed);
@@ -31,4 +41,3 @@ public readonly partial record struct Phone
 
     public override string ToString() => Value;
 }
-

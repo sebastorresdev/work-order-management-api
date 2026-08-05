@@ -1,3 +1,5 @@
+using ErrorOr;
+
 namespace Skvia.BaseTemplate.Domain.Employees;
 
 public record DocumentIdentifier
@@ -13,14 +15,21 @@ public record DocumentIdentifier
         Number = number;
     }
 
-    public static DocumentIdentifier Create(DocumentType type, string number)
+    public static ErrorOr<DocumentIdentifier> Create(DocumentType type, string number)
     {
-        ArgumentNullException.ThrowIfNull(number);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(number.Length, EmployeeConstants.DocumentNumberMaxLength);
+        if (string.IsNullOrWhiteSpace(number))
+        {
+            return Error.Validation("DocumentIdentifier.Empty", "El número de documento no puede estar vacío.");
+        }
 
-        return new DocumentIdentifier(type, number.Trim());
+        var trimmed = number.Trim();
+        if (trimmed.Length > EmployeeConstants.DocumentNumberMaxLength)
+        {
+            return Error.Validation("DocumentIdentifier.TooLong", $"El número de documento excede los {EmployeeConstants.DocumentNumberMaxLength} caracteres.");
+        }
+
+        return new DocumentIdentifier(type, trimmed);
     }
 
     public override string ToString() => $"{Type}: {Number}";
 }
-

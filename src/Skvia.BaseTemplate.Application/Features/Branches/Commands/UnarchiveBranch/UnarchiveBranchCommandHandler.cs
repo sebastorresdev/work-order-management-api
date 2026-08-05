@@ -1,22 +1,26 @@
 using Skvia.BaseTemplate.Application.Common.Interfaces;
 using Skvia.BaseTemplate.Domain.Branches;
+using Skvia.BaseTemplate.Domain.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Skvia.BaseTemplate.Application.Features.Branches.Commands.UnarchiveBranch;
 
-public class UnarchiveBranchCommandHandler(IApplicationDbContext dbContext) : ICommandHandler<UnarchiveBranchCommand, ErrorOr<Success>>
+public class UnarchiveBranchCommandHandler(IApplicationDbContext dbContext)
+    : ICommandHandler<UnarchiveBranchCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(UnarchiveBranchCommand command, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches.FindAsync([command.BranchId], cancellationToken);
+        var branch = await dbContext.Branches
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(b => b.Id == command.BranchId, cancellationToken);
 
         if (branch is null)
             return BranchErrors.NotFound;
 
-        // TODO: Corregir implementacion
-        // branch.Unarchive();
+        branch.Unarchive();
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }
 }
-

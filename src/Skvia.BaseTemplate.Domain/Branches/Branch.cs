@@ -1,49 +1,81 @@
-using Skvia.BaseTemplate.Domain.Common;
-
 namespace Skvia.BaseTemplate.Domain.Branches;
 
-public class Branch : BaseAuditableEntity
+public class Branch : BaseAuditableEntity, IArchivable
 {
     public string Code { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public string? Address { get; private set; }
+    public bool IsArchived { get; set; }
+    public DateTimeOffset? ArchivedAt { get; set; }
+    public Guid? ArchivedBy { get; set; }
 
     private readonly List<BranchUser> _branchUsers = [];
     public IReadOnlyCollection<BranchUser> BranchUsers => _branchUsers.AsReadOnly();
 
     private Branch() { } // EF Core
 
-    public static Branch Create(string code, string name, string? address = null)
+    public static ErrorOr<Branch> Create(string code, string name, string? address = null)
     {
-        var branch = new Branch();
+        List<Error> errors = [];
 
-        ArgumentNullException.ThrowIfNull(code);
-        ArgumentNullException.ThrowIfNull(name);
+        if (string.IsNullOrWhiteSpace(code) || code.Length > BranchConstants.CodeMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.CodeInvalid", $"El código de la sede es requerido y no debe exceder {BranchConstants.CodeMaxLength} caracteres."));
+        }
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(code.Length, BranchConstants.CodeMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(name.Length, BranchConstants.NameMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(address?.Length ?? 0, BranchConstants.AddressMaxLength);
+        if (string.IsNullOrWhiteSpace(name) || name.Length > BranchConstants.NameMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.NameInvalid", $"El nombre de la sede es requerido y no debe exceder {BranchConstants.NameMaxLength} caracteres."));
+        }
 
-        branch.Code = code.Trim().ToUpper();
-        branch.Name = name.Trim();
-        branch.Address = address?.Trim();
+        if (address != null && address.Length > BranchConstants.AddressMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.AddressInvalid", $"La dirección no debe exceder {BranchConstants.AddressMaxLength} caracteres."));
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        var branch = new Branch
+        {
+            Code = code.Trim().ToUpper(),
+            Name = name.Trim(),
+            Address = address?.Trim()
+        };
 
         return branch;
     }
 
-    public void Update(string code, string name, string? address = null)
+    public ErrorOr<Success> Update(string code, string name, string? address = null)
     {
-        ArgumentNullException.ThrowIfNull(code);
-        ArgumentNullException.ThrowIfNull(name);
+        List<Error> errors = [];
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(code.Length, BranchConstants.CodeMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(name.Length, BranchConstants.NameMaxLength);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(address?.Length ?? 0, BranchConstants.AddressMaxLength);
+        if (string.IsNullOrWhiteSpace(code) || code.Length > BranchConstants.CodeMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.CodeInvalid", $"El código de la sede es requerido y no debe exceder {BranchConstants.CodeMaxLength} caracteres."));
+        }
+
+        if (string.IsNullOrWhiteSpace(name) || name.Length > BranchConstants.NameMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.NameInvalid", $"El nombre de la sede es requerido y no debe exceder {BranchConstants.NameMaxLength} caracteres."));
+        }
+
+        if (address != null && address.Length > BranchConstants.AddressMaxLength)
+        {
+            errors.Add(Error.Validation("Branch.AddressInvalid", $"La dirección no debe exceder {BranchConstants.AddressMaxLength} caracteres."));
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
 
         Code = code.Trim().ToUpper();
         Name = name.Trim();
         Address = address?.Trim();
+
+        return Result.Success;
     }
-
 }
-

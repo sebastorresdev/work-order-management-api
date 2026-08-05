@@ -1,0 +1,266 @@
+@baseUrl = https://localhost:7072
+@authToken = CfDJ8IkIg41ZraBIkqwcaJ1gN5Hb4GApY09FrwiZ1m3GEJZE5qTSGrwFeAtUNjlwRZISoY2hfMHolJC6YwWW5HEYVopPjJCADCPfG1ljcKtx4dyYri2wfRytwRHD9g5kfm6TdK9Umqrl-h6NZMgsE6Rjd3pQydqIg5OXFCfhj0EmpN2D8intvrN4kTgW3IiyVNEW4P9Cnlc6jJd7h7KMXCcO7_8MmO1T7uYjRAEnTZ6Zy5eauUaEZZhwsZVeOlyHJJ78Jpdo5sHAqoCBuVaFPY98imUheHAqBMlQl9OhUkMQFF7sHR11bN9V4c-WV_NoNDHU3bnhOjZOb_yBtvxOzMjUUYvc5NrCi07BJ09HoQ3DK-1lpy5FjPoEkAJF7RmrjD-GCEzJ5q3L8faaCuxHODEhFlBM9wrnTzE2scbtdpEvkJGaWy1Uplajy1ZdTPB2UEN-ikdCGbItbeAIBmFjrWEQfGjEV3NRG2h5nyPZ-pW23rdDo9udb1IosE_BcC4XN7H3Ng9TTMOSC4CxLjkBavMgTomCeb9-THOh1BfxVA3Eh50szA4ix1EIFEFKUbQ2ZnjY9QIhR5hskJeqkwQeklSahLy-4SI962i8bAsUu9KYW9gfugvxjVxNMYczgZGn6p4dK6e64Rvno8dalKPryRK5UAjT-NQES4ra2klVekdggk6g219_jvAJLeulF5b9JsWwQxg_c-Aut2OCltP7LTATbXxs6gxdGhvHckITa2tO11tqQZKzoo-VyQKpe751BigKCE34HunrMd9lNB_UBJifrbF-3-Yup1es9kEKCYlOVbsMYN2y1kTFTeN7MrpD9dm18bybDOtXrxNImpKg4UJMsLd_ZooJXTMy-wMOydwU86qWBINkNaou7zrymca8GNMKzw5-FDtSScvl2p4EoiTftclwn_9edIrP1AahAOcxqjNN9K3fBpPyfAtT-wfj5EVsyMZwam-QDjjdGSUjhTv5O7JeneSrr_IsSLGL370UFiMvQ1rVwsVTWYy7c6C8XegwNIeLGTpKK8_WXrCEbGGet3hxOxpQ7awFRxBY4mTs9lL-kdTYfQG1Tj4GUS2jy8QBWJk5VwVy6ESn0xG_ijLfwwtww8AYsP4lF9dkFinIsYW8455ZmheV61fBn97_puN5LxxQoXE6LfdzPdJtorW54GzVX8HjxGKfyBc5Y9Yz46KGExBvyfsmyHr9gJoUVw9z9PjvouibyZ8zub2E7UclN7LgvtpKnG5KtfDAxj5dl4ZMTuQ7eO0DUlClVY8b_l2_O0ySxKbp-a-XVkhgAc64GacXmT2TstjLVxOGruIGw5dArAWeahQPUxdBwSV8sHchZfCSIVjEhFCZM7nNDPK8nxk2fwQc-zQiwhdd8pAAjVrcaazEz7D8pVI_BXVqeSl5hJ7fdUDSp87h8ZAm3oqorE2tj_Qp8g9vYoUXKQSUnSyeCrEDX5T9bB4cBvSlpfz6v-KlnvNeBSoWeu4E1QM5JtmV1ajZjNEha5SCXZsOB6j10rASvi0aZsHVq1l5lRmN36DFEvkPvsPONYLhiHfzdFsYggUKsRVF6_9SyNfqUWXdLlSEHoh4Y_xpVgIg_nd179bQ4aVG0Z0WNq26yId5Bfqc7Fz6hQtzq_4-9GGjvVpW7QiKx2Po2RK8VzzoIujyPly28RlVNrR6Cg12vVWg0ynjKEecS9g-sZjkXsisvnhuPr_u9IBzMwnjO53tOZxsp6ObCrKwcNzGDj6YBYltSpabigtpccN0le2Uh8QWF8Pmsn2wyHa80t_WnEuWvyqrjl3SFirjqwxGQSIi2-xceP2DMwHGGYSz1pDT7UMmeZl44IyKZ3lWVi29sS5t3MWtokjsBiY-7EcU74cctxaL7Jb21qbof2Il0aujnHRJeeb3CLGGc_41H4TbTXc9HhGCkEse0uBgpJJdB_NObSOOuA-RWZXfi2EEm0jQXIALFdkuvcY7REHmG0nJEpbHgnTlhtS67J6g94gmUwOm5JJvrYA
+
+###############################################################################
+# 1. AUTENTICACIÓN (Auth)
+###############################################################################
+
+### Login de Usuario (Obtener Token)
+# @name login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Password123*"
+}
+
+### Obtener Información del Usuario Autenticado
+GET {{baseUrl}}/api/v1/auth/me
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# 2. SEDES / SUCURSALES (Branches)
+###############################################################################
+
+### Listar todas las Sedes
+GET {{baseUrl}}/api/v1/branches
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Obtener Sede por ID
+GET {{baseUrl}}/api/v1/branches/019fd3d8-8f44-7ee7-a7a5-37447251111b
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Crear Nueva Sede
+POST {{baseUrl}}/api/v1/branches
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "LIM-01",
+  "name": "Sede Central Lima",
+  "address": "Av. Javier Prado Este 1234, San Isidro"
+}
+
+### Actualizar Sede
+PUT {{baseUrl}}/api/v1/branches/019fd3d8-8f44-7ee7-a7a5-37447251111b
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "LIM-01",
+  "name": "Sede Principal Lima - Modificada",
+  "address": "Av. Javier Prado Este 5678, San Isidro"
+}
+
+### Archivar Sede (Archivado Lógico)
+PATCH {{baseUrl}}/api/v1/branches/019fd3d8-8f44-7ee7-a7a5-37447251111b/archive
+Authorization: Bearer {{authToken}}
+
+### Desarchivar Sede
+PATCH {{baseUrl}}/api/v1/branches/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6b/unarchive
+Authorization: Bearer {{authToken}}
+
+### Eliminar Sede (Físicamente si no tiene dependencias)
+DELETE {{baseUrl}}/api/v1/branches/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6b
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# 3. EMPLEADOS (Employees)
+###############################################################################
+
+### Listar Empleados
+GET {{baseUrl}}/api/v1/employees
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Obtener Empleado por ID
+GET {{baseUrl}}/api/v1/employees/019fd3e7-1358-7851-a0d4-f5fb0f0700c2
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Crear Empleado
+POST {{baseUrl}}/api/v1/employees
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "EMP-001",
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "documentType": 1,
+  "documentNumber": "72635418",
+  "hireDate": "2026-01-15T00:00:00Z",
+  "email": "juan.perez@empresa.com",
+  "phone": "+51987654321",
+  "position": "Desarrollador Senior",
+  "department": "Tecnología de la Información"
+}
+
+### Actualizar Empleado
+PUT {{baseUrl}}/api/v1/employees/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6c
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": "EMP-001",
+  "firstName": "Juan Carlos",
+  "lastName": "Pérez Gómez",
+  "documentType": 1,
+  "documentNumber": "72635418",
+  "hireDate": "2026-01-15T00:00:00Z",
+  "email": "juan.perez@empresa.com",
+  "phone": "+51987654321",
+  "position": "Líder Técnico",
+  "department": "Tecnología de la Información"
+}
+
+### Archivar Empleado (Archivado Lógico)
+PATCH {{baseUrl}}/api/v1/employees/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6c/archive
+Authorization: Bearer {{authToken}}
+
+### Desarchivar Empleado
+PATCH {{baseUrl}}/api/v1/employees/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6c/unarchive
+Authorization: Bearer {{authToken}}
+
+### Eliminar Empleado
+DELETE {{baseUrl}}/api/v1/employees/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6c
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# 4. ROLES (Roles)
+###############################################################################
+
+### Listar Roles
+GET {{baseUrl}}/api/v1/roles
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Obtener Rol por ID
+GET {{baseUrl}}/api/v1/roles/019fd3e7-9b9c-764b-b38c-974a3b7206bc
+Authorization: Bearer {{authToken}}
+
+### Crear Rol
+POST {{baseUrl}}/api/v1/roles
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Supervisor de Operaciones",
+  "description": "Acceso a reportes y gestión de personal de sucursal"
+}
+
+### Actualizar Rol
+PUT {{baseUrl}}/api/v1/roles/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6d
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Supervisor Senior",
+  "description": "Acceso amplio a reportes y operaciones"
+}
+
+### Obtener Permisos de un Rol
+GET {{baseUrl}}/api/v1/roles/019fd3e7-9b9c-764b-b38c-974a3b7206bc/permissions
+Authorization: Bearer {{authToken}}
+
+### Asignar Permisos a un Rol
+PUT {{baseUrl}}/api/v1/roles/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6d/permissions
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "permissionKeys": [
+    "Permissions.Employees.View",
+    "Permissions.Employees.Create",
+    "Permissions.Branches.View"
+  ]
+}
+
+### Eliminar Rol
+DELETE {{baseUrl}}/api/v1/roles/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6d
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# 5. USUARIOS (Users)
+###############################################################################
+
+### Listar Usuarios
+GET {{baseUrl}}/api/v1/users
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+### Obtener Usuario por ID
+GET {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e
+Authorization: Bearer {{authToken}}
+
+### Crear Usuario
+POST {{baseUrl}}/api/v1/users
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "userName": "jperez",
+  "password": "Password123!",
+  "email": "jperez@empresa.com",
+  "displayName": "Juan Pérez",
+  "phoneNumber": "+51987654321",
+  "branchIds": [],
+  "roleIds": []
+}
+
+### Actualizar Usuario
+PUT {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "userName": "jperez",
+  "isActive": true,
+  "email": "jperez@empresa.com",
+  "displayName": "Juan Carlos Pérez",
+  "phoneNumber": "+51987654321",
+  "branchIds": [],
+  "roleIds": []
+}
+
+### Cambiar Estado (Activo / Inactivo) de Usuario
+PATCH {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+
+### Resetear Contraseña de Usuario
+POST {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e/reset-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "newPassword": "NewPassword123!",
+  "confirmNewPassword": "NewPassword123!"
+}
+
+### Obtener Permisos de un Usuario
+GET {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e/permissions
+Authorization: Bearer {{authToken}}
+
+### Asignar Sobrescritura de Permisos Directos a Usuario
+PUT {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e/permissions
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "permissionKeys": [
+    "Permissions.Branches.Create"
+  ]
+}
+
+### Eliminar Usuario
+DELETE {{baseUrl}}/api/v1/users/01912a3b-4c5d-7e8f-9a0b-1c2d3e4f5a6e
+Authorization: Bearer {{authToken}}

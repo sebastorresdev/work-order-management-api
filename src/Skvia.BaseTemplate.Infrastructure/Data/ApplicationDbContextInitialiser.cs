@@ -54,7 +54,7 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            await _context.Database.EnsureCreatedAsync();
+            await _context.Database.MigrateAsync();
         }
         catch (Exception ex)
         {
@@ -106,7 +106,7 @@ public class ApplicationDbContextInitialiser
         var branch = await _context.Branches.FirstOrDefaultAsync(b => b.Code == "SKVIA_01");
         if (branch is null)
         {
-            branch = Branch.Create("SKVIA_01", "Sede principal");
+            branch = Branch.Create("SKVIA_01", "Sede principal").Value;
             _context.Branches.Add(branch);
             await _context.SaveChangesAsync();
         }
@@ -114,7 +114,7 @@ public class ApplicationDbContextInitialiser
         var branch2 = await _context.Branches.FirstOrDefaultAsync(b => b.Code == "SKVIA_02");
         if (branch2 is null)
         {
-            branch2 = Branch.Create("SKVIA_02", "Sede base");
+            branch2 = Branch.Create("SKVIA_02", "Sede base").Value;
             _context.Branches.Add(branch2);
             await _context.SaveChangesAsync();
         }

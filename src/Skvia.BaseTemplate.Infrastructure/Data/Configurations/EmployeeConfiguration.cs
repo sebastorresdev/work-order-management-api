@@ -37,16 +37,16 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         // Configure Email with a ValueConverter
         builder.Property(p => p.Email)
             .HasConversion(
-                v => v.HasValue ? v.Value.Value : null, // Convert Email? to string?
-                v => v != null ? Email.Create(v) : (Email?)null) // Convert string? to Email?
+                v => v.HasValue ? v.Value.Value : null,
+                v => v != null ? Email.FromDb(v) : (Email?)null)
             .HasMaxLength(EmployeeConstants.EmailMaxLength)
             .IsRequired(false);
 
         // Configure Phone with a ValueConverter
         builder.Property(p => p.Phone)
             .HasConversion(
-                v => v.HasValue ? v.Value.Value : null, // Convert Phone? to string?
-                v => v != null ? Phone.Create(v) : (Phone?)null) // Convert string? to Phone?
+                v => v.HasValue ? v.Value.Value : null,
+                v => v != null ? Phone.FromDb(v) : (Phone?)null)
             .HasMaxLength(EmployeeConstants.PhoneMaxLength)
             .IsRequired(false);
 

@@ -22,6 +22,9 @@ public static partial class Permission
 
         [PermissionInfo("Eliminar Empleado", "Permite eliminar un empleado.")]
         public const string Delete = "Permissions.Employees.Delete";
+
+        [PermissionInfo("Archivar Empleado", "Permite archivar o desarchivar un empleado.")]
+        public const string Archive = "Permissions.Employees.Archive";
     }
 }
 

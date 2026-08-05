@@ -1,5 +1,8 @@
+using Skvia.BaseTemplate.Application.Common.Security;
+
 namespace Skvia.BaseTemplate.Application.Features.Users.Commands.CreateUser;
 
+[HasPermission(Permission.User.Create)]
 public record CreateUserCommand(
     string UserName,
     string Password,
@@ -10,4 +13,3 @@ public record CreateUserCommand(
     List<Guid> BranchIds,
     List<Guid> RoleIds
 ) : ICommand<ErrorOr<Guid>>;
-

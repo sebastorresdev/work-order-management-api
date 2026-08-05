@@ -14,14 +14,17 @@ public class CreateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
             return EmployeeErrors.CodeExists(command.Code);
         }
 
-        var documentIdentifier = DocumentIdentifier.Create(command.DocumentType, command.DocumentNumber);
+        var docResult = DocumentIdentifier.Create(command.DocumentType, command.DocumentNumber);
+        if (docResult.IsError) return docResult.Errors;
+
+        var documentIdentifier = docResult.Value;
 
         if (await dbContext.Employees.AnyAsync(e => e.DocumentIdentifier.Type == documentIdentifier.Type && e.DocumentIdentifier.Number == documentIdentifier.Number, cancellationToken))
         {
             return EmployeeErrors.DocumentExists(command.DocumentNumber);
         }
 
-        var employee = Employee.Create(
+        var employeeResult = Employee.Create(
             code: command.Code,
             firstName: command.FirstName,
             lastName: command.LastName,
@@ -33,10 +36,13 @@ public class CreateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
             department: command.Department,
             photoUrl: command.PhotoUrl);
 
+        if (employeeResult.IsError) return employeeResult.Errors;
+
+        var employee = employeeResult.Value;
+
         dbContext.Employees.Add(employee);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return employee.Id;
     }
 }
-

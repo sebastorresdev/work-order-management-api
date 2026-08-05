@@ -18,8 +18,10 @@ public static class DependencyInjection
 {
     public static IHostApplicationBuilder AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
-        // Auditorias
+        // Auditorias e Interceptores
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        builder.Services.AddScoped<ISaveChangesInterceptor, AuditTrailInterceptor>();
+        builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
         builder.Services.AddSingleton<IClock, SystemClock>();
         builder.Services.AddSingleton<ITimeZoneProvider, SystemTimeZoneProvider>();
         builder.Services.Configure<SeedOptions>(builder.Configuration.GetSection(SeedOptions.SectionName));
@@ -27,12 +29,12 @@ public static class DependencyInjection
         // 2. Registro clásico adaptado con las convenciones necesarias
         builder.Services.AddDbContext<ApplicationDbContext>((sp, opt) =>
         {
-            var interceptor = sp.GetRequiredService<ISaveChangesInterceptor>();
+            var interceptors = sp.GetServices<ISaveChangesInterceptor>();
 
             // Nota: El connectionString real ya lo manejará automáticamente el orquestador a nivel de infraestructura
             string? connectionString = builder.Configuration.GetConnectionString("skvia-base-template-db");
 
-            opt.UseNpgsql(connectionString).AddInterceptors(interceptor);
+            opt.UseNpgsql(connectionString).AddInterceptors(interceptors);
             opt.UseSnakeCaseNamingConvention();
         });
 

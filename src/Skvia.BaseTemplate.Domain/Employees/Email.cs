@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ErrorOr;
 
 namespace Skvia.BaseTemplate.Domain.Employees;
 
@@ -14,15 +15,25 @@ public readonly partial record struct Email
         Value = value;
     }
 
-    public static Email Create(string emailAddress)
+    public static Email FromDb(string value) => new(value);
+
+    public static ErrorOr<Email> Create(string emailAddress)
     {
-        ArgumentNullException.ThrowIfNull(emailAddress);
+        if (string.IsNullOrWhiteSpace(emailAddress))
+        {
+            return Error.Validation("Email.Empty", "La dirección de correo no puede estar vacía.");
+        }
+
         var trimmed = emailAddress.Trim();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(trimmed.Length, EmployeeConstants.EmailMaxLength);
+
+        if (trimmed.Length > EmployeeConstants.EmailMaxLength)
+        {
+            return Error.Validation("Email.TooLong", $"El correo excede la longitud máxima de {EmployeeConstants.EmailMaxLength} caracteres.");
+        }
 
         if (!EmailRegex().IsMatch(trimmed))
         {
-            throw new ArgumentException("Invalid email address format.", nameof(emailAddress));
+            return Error.Validation("Email.InvalidFormat", "El formato del correo electrónico es inválido.");
         }
 
         return new Email(trimmed);
@@ -30,4 +41,3 @@ public readonly partial record struct Email
 
     public override string ToString() => Value;
 }
-
