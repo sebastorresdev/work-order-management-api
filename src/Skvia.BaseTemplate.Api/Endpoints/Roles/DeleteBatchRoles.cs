@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Skvia.BaseTemplate.Api.Endpoints.Roles.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Roles.Commands.DeleteRole;
 
@@ -31,4 +30,7 @@ public class DeleteBatchRoles : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public record DeleteRolesBatchRequest(List<Guid> RoleIds);
+
 

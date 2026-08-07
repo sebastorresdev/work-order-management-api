@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using ErrorOr;
 
 namespace Skvia.BaseTemplate.Domain.Employees;
 
@@ -19,21 +18,28 @@ public readonly partial record struct Email
 
     public static ErrorOr<Email> Create(string emailAddress)
     {
+        List<Error> errors = [];
+
         if (string.IsNullOrWhiteSpace(emailAddress))
         {
-            return Error.Validation("Email.Empty", "La dirección de correo no puede estar vacía.");
+            errors.Add(Error.Validation("Email.Empty", "La dirección de correo no puede estar vacía."));
         }
 
         var trimmed = emailAddress.Trim();
 
         if (trimmed.Length > EmployeeConstants.EmailMaxLength)
         {
-            return Error.Validation("Email.TooLong", $"El correo excede la longitud máxima de {EmployeeConstants.EmailMaxLength} caracteres.");
+            errors.Add(Error.Validation("Email.TooLong", $"El correo excede la longitud máxima de {EmployeeConstants.EmailMaxLength} caracteres."));
         }
 
         if (!EmailRegex().IsMatch(trimmed))
         {
-            return Error.Validation("Email.InvalidFormat", "El formato del correo electrónico es inválido.");
+            errors.Add(Error.Validation("Email.InvalidFormat", "El formato del correo electrónico es inválido."));
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
         }
 
         return new Email(trimmed);

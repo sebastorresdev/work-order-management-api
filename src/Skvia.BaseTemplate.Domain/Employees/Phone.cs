@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using ErrorOr;
 
 namespace Skvia.BaseTemplate.Domain.Employees;
 
@@ -19,21 +18,28 @@ public readonly partial record struct Phone
 
     public static ErrorOr<Phone> Create(string phoneNumber)
     {
+        List<Error> errors = [];
+
         if (string.IsNullOrWhiteSpace(phoneNumber))
         {
-            return Error.Validation("Phone.Empty", "El número de teléfono no puede estar vacío.");
+            errors.Add(Error.Validation("Phone.Empty", "El número de teléfono no puede estar vacío."));
         }
 
         var trimmed = phoneNumber.Trim();
 
         if (trimmed.Length > EmployeeConstants.PhoneMaxLength)
         {
-            return Error.Validation("Phone.TooLong", $"El número de teléfono excede los {EmployeeConstants.PhoneMaxLength} caracteres.");
+            errors.Add(Error.Validation("Phone.TooLong", $"El número de teléfono excede los {EmployeeConstants.PhoneMaxLength} caracteres."));
         }
 
         if (!PhoneRegex().IsMatch(trimmed))
         {
-            return Error.Validation("Phone.InvalidFormat", "El formato del teléfono es inválido.");
+            errors.Add(Error.Validation("Phone.InvalidFormat", "El formato del teléfono es inválido."));
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
         }
 
         return new Phone(trimmed);

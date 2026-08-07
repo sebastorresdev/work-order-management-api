@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Skvia.BaseTemplate.Application.Common.Interfaces;
 using Skvia.BaseTemplate.Domain.Auditing;

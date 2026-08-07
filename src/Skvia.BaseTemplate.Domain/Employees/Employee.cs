@@ -1,6 +1,3 @@
-using ErrorOr;
-using Skvia.BaseTemplate.Domain.Common;
-
 namespace Skvia.BaseTemplate.Domain.Employees;
 
 public class Employee : BaseAuditableEntity, IArchivable

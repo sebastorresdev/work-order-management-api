@@ -1,4 +1,3 @@
-using Skvia.BaseTemplate.Api.Endpoints.Roles.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Roles.Commands.CreateRole;
 
@@ -6,8 +5,6 @@ namespace Skvia.BaseTemplate.Api.Endpoints.Roles;
 
 public class CreateRole : IEndpoint
 {
-    public record CreateRoleResponse(Guid Id);
-
     public static void Map(RouteGroupBuilder group)
         => group.MapPost("/", Handle)
             .WithName(nameof(CreateRole))
@@ -33,4 +30,9 @@ public class CreateRole : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public record CreateRoleRequest(string Name, string Description);
+
+public record CreateRoleResponse(Guid Id);
+
 

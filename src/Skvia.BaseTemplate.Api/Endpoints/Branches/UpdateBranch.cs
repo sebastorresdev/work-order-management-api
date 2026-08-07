@@ -1,4 +1,3 @@
-using Skvia.BaseTemplate.Api.Endpoints.Branches.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Branches.Commands.UpdateBranch;
 
@@ -31,4 +30,7 @@ public sealed class UpdateBranch : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public record UpdateBranchRequest(string Code, string Name, string? Address);
+
 

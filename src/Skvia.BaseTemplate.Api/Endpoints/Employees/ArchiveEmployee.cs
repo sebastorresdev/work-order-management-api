@@ -6,15 +6,13 @@ namespace Skvia.BaseTemplate.Api.Endpoints.Employees;
 public sealed class ArchiveEmployee : IEndpoint
 {
     public static void Map(RouteGroupBuilder group)
-    {
-        group.MapPatch("/{id:guid}/archive", Handle)
+        => group.MapPatch("/{id:guid}/archive", Handle)
             .WithName(nameof(ArchiveEmployee))
             .WithSummary("Archivar empleado")
             .WithDescription("Archiva un empleado en el sistema.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
-    }
 
     private static async Task<IResult> Handle(
         Guid id,

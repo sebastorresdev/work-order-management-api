@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 using Skvia.BaseTemplate.Domain.Identity;
 
 namespace Skvia.BaseTemplate.Infrastructure.Data.Configurations;

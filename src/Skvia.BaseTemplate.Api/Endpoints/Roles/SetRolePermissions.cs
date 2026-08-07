@@ -1,4 +1,3 @@
-using Skvia.BaseTemplate.Api.Endpoints.Roles.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Roles.Commands.SetRolePermissions;
 
@@ -30,4 +29,10 @@ public class SetRolePermissions : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public class SetRolePermissionsRequest
+{
+    public List<string> PermissionKeys { get; set; } = [];
+}
+
 

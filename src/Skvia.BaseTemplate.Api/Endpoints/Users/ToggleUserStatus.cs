@@ -1,4 +1,3 @@
-using Skvia.BaseTemplate.Api.Endpoints.Users.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Users.Commands.ToggleUserStatus;
 
@@ -29,4 +28,10 @@ public sealed class ToggleUserStatus : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public class ToggleUserStatusRequest
+{
+    public bool IsActive { get; set; }
+}
+
 

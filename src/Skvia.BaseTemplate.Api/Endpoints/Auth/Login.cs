@@ -2,7 +2,6 @@ using System.Security.Claims;
 
 using Microsoft.AspNetCore.Identity;
 
-using Skvia.BaseTemplate.Api.Endpoints.Auth.Requests;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Auth.Commands.Login;
 
@@ -10,12 +9,6 @@ namespace Skvia.BaseTemplate.Api.Endpoints.Auth;
 
 public sealed class Login : IEndpoint
 {
-    private sealed record AuthTokenResponse(
-        string TokenType,
-        string AccessToken,
-        int ExpiresIn,
-        string RefreshToken);
-
     public static void Map(RouteGroupBuilder group)
         => group.MapPost("/login", Handle)
             .WithName(nameof(Login))
@@ -41,3 +34,10 @@ public sealed class Login : IEndpoint
     }
 }
 
+public record LoginRequest(string UserName, string Password);
+
+public record AuthTokenResponse(
+        string TokenType,
+        string AccessToken,
+        int ExpiresIn,
+        string RefreshToken);

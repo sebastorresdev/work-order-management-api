@@ -1,5 +1,3 @@
-using Skvia.BaseTemplate.Api.Endpoints.Branches.Requests;
-using Skvia.BaseTemplate.Api.Endpoints.Branches.Responses;
 using Skvia.BaseTemplate.Api.Models;
 using Skvia.BaseTemplate.Application.Features.Branches.Commands.CreateBranch;
 
@@ -29,4 +27,9 @@ public sealed class CreateBranch : IEndpoint
             errors => errors.ToProblem());
     }
 }
+
+public record CreateBranchRequest(string Code, string Name, string? Address);
+
+public record CreateBranchResponse(Guid Id);
+
 

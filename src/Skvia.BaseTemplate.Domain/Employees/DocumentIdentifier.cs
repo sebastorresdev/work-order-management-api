@@ -1,5 +1,3 @@
-using ErrorOr;
-
 namespace Skvia.BaseTemplate.Domain.Employees;
 
 public record DocumentIdentifier
@@ -17,15 +15,22 @@ public record DocumentIdentifier
 
     public static ErrorOr<DocumentIdentifier> Create(DocumentType type, string number)
     {
+        List<Error> errors = [];
+
         if (string.IsNullOrWhiteSpace(number))
         {
-            return Error.Validation("DocumentIdentifier.Empty", "El número de documento no puede estar vacío.");
+            errors.Add(Error.Validation("DocumentIdentifier.Empty", "El número de documento no puede estar vacío."));
         }
 
         var trimmed = number.Trim();
         if (trimmed.Length > EmployeeConstants.DocumentNumberMaxLength)
         {
-            return Error.Validation("DocumentIdentifier.TooLong", $"El número de documento excede los {EmployeeConstants.DocumentNumberMaxLength} caracteres.");
+            errors.Add(Error.Validation("DocumentIdentifier.TooLong", $"El número de documento excede los {EmployeeConstants.DocumentNumberMaxLength} caracteres."));
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
         }
 
         return new DocumentIdentifier(type, trimmed);
