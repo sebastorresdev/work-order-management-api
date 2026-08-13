@@ -1,5 +1,8 @@
 namespace Skvia.BaseTemplate.Domain.Identity;
 
+/// <summary>
+/// Proporciona las definiciones centralizadas de errores de dominio y autenticación relacionados con usuarios.
+/// </summary>
 public static class UserErrors
 {
     /// <summary>
@@ -14,7 +17,7 @@ public static class UserErrors
     /// <summary>
     /// Indica que el nombre de usuario proporcionado ya está en uso.
     /// </summary>
-    /// <param name="userName"></param>
+    /// <param name="userName">Nombre de usuario duplicado.</param>
     /// <returns>Un objeto <see cref="Error"/> configurado como un <c>Conflict</c> (HTTP 409).</returns>
     public static Error DuplicateUser(string userName) =>
         Error.Conflict(
@@ -33,8 +36,8 @@ public static class UserErrors
     /// <summary>
     /// Indica que la cuenta del usuario está bloqueada temporalmente debido a demasiados intentos fallidos de inicio de sesión.
     /// </summary>
-    /// <param name="lockoutEnd"></param>
-    /// <returns></returns>
+    /// <param name="lockoutEnd">Fecha y hora de finalización del bloqueo temporal.</param>
+    /// <returns>Objeto de error indicando el tiempo restante de bloqueo.</returns>
     public static Error AccountLocked(DateTimeOffset? lockoutEnd) => Error.Validation(
         code: "User.AccountLocked",
         description: lockoutEnd.HasValue
@@ -49,6 +52,11 @@ public static class UserErrors
         code: "User.Unauthenticated",
         description: "El usuario no se encuentra autenticado o la sesión ha expirado.");
 
+    /// <summary>
+    /// Error inesperado o de excepción general ocurrido en operaciones de usuario.
+    /// </summary>
+    /// <param name="message">Detalle técnico del error inesperado.</param>
+    /// <returns>Objeto de error de tipo Unexpected.</returns>
     public static Error UnexpectedError(string message) =>
         Error.Unexpected(code: "UserException", description: message);
 }
