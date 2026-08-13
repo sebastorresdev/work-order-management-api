@@ -8,10 +8,10 @@ Plantilla backend empresarial desarrollada en .NET 10 con Clean Architecture, CQ
 
 ```text
 src/
-├── Skvia.BaseTemplate.Domain/        # Entidades, Objetos de Valor e IArchivable
-├── Skvia.BaseTemplate.Application/   # CQRS, Permisos, Manejo Funcional de Errores (ErrorOr)
-├── Skvia.BaseTemplate.Infrastructure/# EF Core, Interceptores (AuditLog, DomainEvents), Identity
-└── Skvia.BaseTemplate.Api/           # Minimal API Endpoints, Middlewares y Swagger/Scalar
+├── WorkOrderManagement.Domain/        # Entidades, Objetos de Valor e IArchivable
+├── WorkOrderManagement.Application/   # CQRS, Permisos, Manejo Funcional de Errores (ErrorOr)
+├── WorkOrderManagement.Infrastructure/# EF Core, Interceptores (AuditLog, DomainEvents), Identity
+└── WorkOrderManagement.Api/           # Minimal API Endpoints, Middlewares y Swagger/Scalar
 ```
 
 ---
@@ -44,17 +44,17 @@ src/
 
 - **Compilar**:
   ```bash
-  dotnet build Skvia.BaseTemplate.slnx
+  dotnet build WorkOrderManagement.slnx
   ```
 - **Pruebas Unitarias**:
   ```bash
-  dotnet test Skvia.BaseTemplate.slnx
+  dotnet test WorkOrderManagement.slnx
   ```
 - **Nueva Migración de EF Core**:
   ```bash
-  dotnet ef migrations add NombreMigracion --project src/Skvia.BaseTemplate.Infrastructure --startup-project src/Skvia.BaseTemplate.Api --output-dir Data/Migrations
+  dotnet ef migrations add NombreMigracion --project src/WorkOrderManagement.Infrastructure --startup-project src/WorkOrderManagement.Api --output-dir Data/Migrations
   ```
 - **Ejecutar API**:
   ```bash
-  dotnet run --project src/Skvia.BaseTemplate.Api
+  dotnet run --project src/WorkOrderManagement.Api
   ```

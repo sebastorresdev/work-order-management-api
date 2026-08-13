@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/WorkOrderManagement.AppHost/WorkOrderManagement.AppHost.csproj" Id="7987d5d3-f73d-443f-9bf6-ace12bc8b196" />
+    <Project Path="aspire/WorkOrderManagement.ServiceDefaults/WorkOrderManagement.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/WorkOrderManagement.Api/WorkOrderManagement.Api.csproj" />
+    <Project Path="src/WorkOrderManagement.Application/WorkOrderManagement.Application.csproj" Id="81db21e7-688a-412d-ad6e-babbbe5e7758" />
+    <Project Path="src/WorkOrderManagement.Domain/WorkOrderManagement.Domain.csproj" Id="386ab27e-e7f9-4a20-bb53-35d1c709bfa9" />
+    <Project Path="src/WorkOrderManagement.Infrastructure/WorkOrderManagement.Infrastructure.csproj" Id="4cc89fde-119a-43eb-ad2a-46fbb0771464" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WorkOrderManagement.Application.Tests/WorkOrderManagement.Application.Tests.csproj" />
+    <Project Path="tests/WorkOrderManagement.Domain.Tests/WorkOrderManagement.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -29,20 +29,20 @@ La capa Application está empezando a depender de detalles concretos de Infrastr
    - Los handlers de Application deberían trabajar con interfaces, no con `UserManager` directamente.
 
 3. Eliminar referencias de Application a namespaces de Infrastructure.
-   - Ejemplo actual: `Skvia.BaseTemplate.Infrastructure.Identity.Domain` usado en handlers de Application.
+   - Ejemplo actual: `WorkOrderManagement.Infrastructure.Identity.Domain` usado en handlers de Application.
    - Esto debe corregirse y mover la definición de errores relacionados a un namespace correcto de Domain, por ejemplo:
-     - `Skvia.BaseTemplate.Domain.Identity`
+     - `WorkOrderManagement.Domain.Identity`
 
 4. Mantener `IApplicationDbContext` como la única dependencia de persistencia visible desde Application.
    - Eso ya está bien orientado, pero conviene extender el patrón a otros servicios como identidad, archivos, correos o permisos.
 
 ### Archivos que probablemente se modificarían
 
-- `src/Skvia.BaseTemplate.Application/Features/Users/Commands/CreateUser/CreateUserCommandHandler.cs`
-- `src/Skvia.BaseTemplate.Application/Features/Users/Commands/ResetPassword/ResetPasswordCommandHandler.cs`
-- `src/Skvia.BaseTemplate.Application/Features/Users/Commands/UpdateUser/UpdateUserCommandHandler.cs`
-- `src/Skvia.BaseTemplate.Application/Features/Users/Queries/GetUserById/GetUserByIdQueryHandler.cs`
-- `src/Skvia.BaseTemplate.Domain/Identity/UserErrors.cs`
+- `src/WorkOrderManagement.Application/Features/Users/Commands/CreateUser/CreateUserCommandHandler.cs`
+- `src/WorkOrderManagement.Application/Features/Users/Commands/ResetPassword/ResetPasswordCommandHandler.cs`
+- `src/WorkOrderManagement.Application/Features/Users/Commands/UpdateUser/UpdateUserCommandHandler.cs`
+- `src/WorkOrderManagement.Application/Features/Users/Queries/GetUserById/GetUserByIdQueryHandler.cs`
+- `src/WorkOrderManagement.Domain/Identity/UserErrors.cs`
 
 ### Resultado esperado
 
@@ -83,10 +83,10 @@ La capa Domain contiene lógica de negocio, pero todavía mezcla decisiones téc
 
 ### Archivos que probablemente se modificarían
 
-- `src/Skvia.BaseTemplate.Domain/Attendances/Attendance.cs`
-- `src/Skvia.BaseTemplate.Domain/EmployeeSchedules/EmployeeSchedule.cs`
-- `src/Skvia.BaseTemplate.Domain/Common/` (nueva ubicación de abstracciones compartidas)
-- `src/Skvia.BaseTemplate.Infrastructure/` (implementación concreta de `IClock` y `ITimeZoneProvider`)
+- `src/WorkOrderManagement.Domain/Attendances/Attendance.cs`
+- `src/WorkOrderManagement.Domain/EmployeeSchedules/EmployeeSchedule.cs`
+- `src/WorkOrderManagement.Domain/Common/` (nueva ubicación de abstracciones compartidas)
+- `src/WorkOrderManagement.Infrastructure/` (implementación concreta de `IClock` y `ITimeZoneProvider`)
 
 ### Resultado esperado
 
@@ -147,10 +147,10 @@ El seeding inicial del sistema está haciendo cosas muy prácticas pero poco seg
 
 ### Archivos que probablemente se modificarían
 
-- `src/Skvia.BaseTemplate.Infrastructure/Data/ApplicationDbContextInitialiser.cs`
-- `src/Skvia.BaseTemplate.Api/appsettings.json`
-- `src/Skvia.BaseTemplate.Api/appsettings.Development.json`
-- `src/Skvia.BaseTemplate.Api/Program.cs` o el lugar donde se invoca la inicialización
+- `src/WorkOrderManagement.Infrastructure/Data/ApplicationDbContextInitialiser.cs`
+- `src/WorkOrderManagement.Api/appsettings.json`
+- `src/WorkOrderManagement.Api/appsettings.Development.json`
+- `src/WorkOrderManagement.Api/Program.cs` o el lugar donde se invoca la inicialización
 
 ### Resultado esperado
 
@@ -207,9 +207,9 @@ El proyecto tiene una estructura muy buena, pero aún no muestra una base sólid
 
 ### Estructura sugerida de test projects
 
-- `tests/Skvia.BaseTemplate.Domain.Tests`
-- `tests/Skvia.BaseTemplate.Application.Tests`
-- `tests/Skvia.BaseTemplate.Api.Tests`
+- `tests/WorkOrderManagement.Domain.Tests`
+- `tests/WorkOrderManagement.Application.Tests`
+- `tests/WorkOrderManagement.Api.Tests`
 
 ### Resultado esperado
 
