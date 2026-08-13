@@ -16,8 +16,18 @@ public static class Roles
     public const string Employee = "Empleado";
 
     /// <summary>
-    /// Rol de Vendedor para operaciones comerciales.
+    /// Rol de Vendedor para operaciones comerciales y registro de solicitudes.
     /// </summary>
     public const string Sales = "Vendedor";
+
+    /// <summary>
+    /// Rol de Backoffice para gestión, derivación y agendamiento de trabajos.
+    /// </summary>
+    public const string Backoffice = "Backoffice";
+
+    /// <summary>
+    /// Rol de Supervisor para supervisar equipos de vendedores y trabajos de la sede.
+    /// </summary>
+    public const string Supervisor = "Supervisor";
 }
 

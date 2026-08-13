@@ -147,6 +147,59 @@ public class ApplicationDbContextInitialiser
             }
         }
 
+        // ROL VENDEDOR
+        var salesRole = await _roleManager.FindByNameAsync(Roles.Sales);
+        if (salesRole is null)
+        {
+            salesRole = new ApplicationRole
+            {
+                Name = Roles.Sales,
+                Description = "Rol de Vendedor para creación y seguimiento de sus solicitudes de servicio",
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+            };
+            await _roleManager.CreateAsync(salesRole);
+        }
+
+        var salesClaims = await _roleManager.GetClaimsAsync(salesRole);
+        string[] salesPermissions = [Permission.WorkOrders.Create, Permission.WorkOrders.View];
+        foreach (var permission in salesPermissions)
+        {
+            if (!salesClaims.Any(c => c.Type == "permissions" && c.Value == permission))
+            {
+                await _roleManager.AddClaimAsync(salesRole, new Claim("permissions", permission));
+            }
+        }
+
+        // ROL BACKOFFICE
+        var backofficeRole = await _roleManager.FindByNameAsync(Roles.Backoffice);
+        if (backofficeRole is null)
+        {
+            backofficeRole = new ApplicationRole
+            {
+                Name = Roles.Backoffice,
+                Description = "Rol de Backoffice para recepción, agendamiento y cierre de solicitudes de servicio",
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+            };
+            await _roleManager.CreateAsync(backofficeRole);
+        }
+
+        var backofficeClaims = await _roleManager.GetClaimsAsync(backofficeRole);
+        string[] backofficePermissions = [
+            Permission.WorkOrders.View,
+            Permission.WorkOrders.Schedule,
+            Permission.WorkOrders.Complete,
+            Permission.WorkOrders.Cancel
+        ];
+        foreach (var permission in backofficePermissions)
+        {
+            if (!backofficeClaims.Any(c => c.Type == "permissions" && c.Value == permission))
+            {
+                await _roleManager.AddClaimAsync(backofficeRole, new Claim("permissions", permission));
+            }
+        }
+
         if (!await _roleManager.RoleExistsAsync("basic"))
         {
             await _roleManager.CreateAsync(new ApplicationRole { Name = "basic" });
