@@ -1,30 +1,14 @@
 using WorkOrderManagement.Application.Features.Employees.DTOs;
+using WorkOrderManagement.Application.Features.Employees.Queries.GetEmployees;
 using WorkOrderManagement.Domain.Employees;
-using Microsoft.EntityFrameworkCore;
 
 namespace WorkOrderManagement.Application.Features.Employees.Queries.GetEmployeeById;
 
-public class GetEmployeeByIdQueryHandler(IApplicationDbContext dbContext) : IQueryHandler<GetEmployeeByIdQuery, ErrorOr<EmployeeDetailResponse>>
+public class GetEmployeeByIdQueryHandler(IEmployeeRepository employeeRepository) : IQueryHandler<GetEmployeeByIdQuery, ErrorOr<EmployeeDetailResponse>>
 {
     public async Task<ErrorOr<EmployeeDetailResponse>> HandleAsync(GetEmployeeByIdQuery query, CancellationToken cancellationToken)
     {
-        var employee = await dbContext.Employees
-            .AsNoTracking()
-            .Where(e => e.Id == query.EmployeeId)
-            .Select(e => new EmployeeDetailResponse(
-                e.Id,
-                e.Code,
-                e.FirstName,
-                e.LastName,
-                e.DocumentIdentifier.Type,
-                e.DocumentIdentifier.Number,
-                e.Email != null ? e.Email.Value.Value : null,
-                e.Phone != null ? e.Phone.Value.Value : null,
-                e.Position,
-                e.Department,
-                e.HireDate,
-                e.PhotoUrl))
-            .FirstOrDefaultAsync(cancellationToken);
+        var employee = await employeeRepository.GetByIdAsync(query.EmployeeId, cancellationToken);
 
         if (employee is null)
         {

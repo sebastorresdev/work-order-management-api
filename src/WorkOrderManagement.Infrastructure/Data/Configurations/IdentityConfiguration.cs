@@ -26,12 +26,15 @@ internal class ApplicationUserConfiguration : IEntityTypeConfiguration<Applicati
             .IsRequired();
 
         builder.HasOne(u => u.Branch).WithMany().HasForeignKey(u => u.BranchId);
+        builder.HasIndex(u => u.BranchId);
         builder.Navigation(u => u.Branch).AutoInclude();
 
         builder.HasOne(u => u.Supervisor)
             .WithMany(u => u.Subordinates)
             .HasForeignKey(u => u.SupervisorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(u => u.SupervisorId);
     }
 }
 

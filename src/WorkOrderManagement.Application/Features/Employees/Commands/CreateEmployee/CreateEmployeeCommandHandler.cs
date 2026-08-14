@@ -1,15 +1,15 @@
+using WorkOrderManagement.Application.Features.Employees.Queries.GetEmployees;
 using WorkOrderManagement.Domain.Employees;
-using Microsoft.EntityFrameworkCore;
 
 namespace WorkOrderManagement.Application.Features.Employees.Commands.CreateEmployee;
 
-public class CreateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICommandHandler<CreateEmployeeCommand, ErrorOr<Guid>>
+public class CreateEmployeeCommandHandler(IEmployeeRepository employeeRepository) : ICommandHandler<CreateEmployeeCommand, ErrorOr<Guid>>
 {
     public async Task<ErrorOr<Guid>> HandleAsync(CreateEmployeeCommand command, CancellationToken cancellationToken)
     {
         var normalizedCode = command.Code.Trim().ToUpperInvariant();
 
-        if (await dbContext.Employees.AnyAsync(e => e.Code == normalizedCode, cancellationToken))
+        if (await employeeRepository.ExistsByCodeAsync(normalizedCode, cancellationToken))
         {
             return EmployeeErrors.CodeExists(command.Code);
         }
@@ -19,7 +19,7 @@ public class CreateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
 
         var documentIdentifier = docResult.Value;
 
-        if (await dbContext.Employees.AnyAsync(e => e.DocumentIdentifier.Type == documentIdentifier.Type && e.DocumentIdentifier.Number == documentIdentifier.Number, cancellationToken))
+        if (await employeeRepository.ExistsByDocumentAsync(documentIdentifier, cancellationToken: cancellationToken))
         {
             return EmployeeErrors.DocumentExists(command.DocumentNumber);
         }
@@ -40,8 +40,8 @@ public class CreateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
 
         var employee = employeeResult.Value;
 
-        dbContext.Employees.Add(employee);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await employeeRepository.AddAsync(employee, cancellationToken);
+        await employeeRepository.SaveChangesAsync(cancellationToken);
 
         return employee.Id;
     }

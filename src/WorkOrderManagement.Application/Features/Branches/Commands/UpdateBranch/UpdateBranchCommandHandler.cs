@@ -1,13 +1,14 @@
-using WorkOrderManagement.Application.Common.Interfaces;
+using WorkOrderManagement.Application.Features.Branches.Commands.CreateBranch;
+using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Domain.Branches;
 
 namespace WorkOrderManagement.Application.Features.Branches.Commands.UpdateBranch;
 
-public class UpdateBranchCommandHandler(IApplicationDbContext dbContext) : ICommandHandler<UpdateBranchCommand, ErrorOr<Success>>
+public class UpdateBranchCommandHandler(IBranchRepository branchRepository) : ICommandHandler<UpdateBranchCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(UpdateBranchCommand command, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches.FindAsync([command.BranchId], cancellationToken);
+        var branch = await branchRepository.GetEntityByIdAsync(command.BranchId, cancellationToken: cancellationToken);
 
         if (branch is null)
         {
@@ -16,14 +17,13 @@ public class UpdateBranchCommandHandler(IApplicationDbContext dbContext) : IComm
 
         var cleanNormalizedCode = command.Code.Trim().ToUpperInvariant();
 
-        if (await dbContext.Branches
-               .AnyAsync(b => b.Code == cleanNormalizedCode && b.Id != command.BranchId, cancellationToken))
+        if (await branchRepository.ExistsByCodeAsync(cleanNormalizedCode, command.BranchId, cancellationToken))
             return BranchErrors.DuplicateBranch(command.Name);
 
         var updateResult = branch.Update(cleanNormalizedCode, command.Name, command.Address);
         if (updateResult.IsError) return updateResult.Errors;
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await branchRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }

@@ -1,17 +1,14 @@
 using WorkOrderManagement.Application.Features.Branches.DTOs;
+using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Domain.Branches;
 
 namespace WorkOrderManagement.Application.Features.Branches.Queries.GetBranchById;
 
-public class GetBranchByIdQueryHandler(IApplicationDbContext dbContext) : IQueryHandler<GetBranchByIdQuery, ErrorOr<BranchDetailResponse>>
+public class GetBranchByIdQueryHandler(IBranchRepository branchRepository) : IQueryHandler<GetBranchByIdQuery, ErrorOr<BranchDetailResponse>>
 {
     public async Task<ErrorOr<BranchDetailResponse>> HandleAsync(GetBranchByIdQuery query, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches
-            .AsNoTracking()
-            .Where(b => b.Id == query.BranchId)
-            .Select(b => new BranchDetailResponse(b.Id, b.Code, b.Name, b.Address))
-            .FirstOrDefaultAsync(cancellationToken);
+        var branch = await branchRepository.GetByIdAsync(query.BranchId, cancellationToken);
 
         return branch is not null
             ? branch

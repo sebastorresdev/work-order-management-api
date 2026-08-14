@@ -1,14 +1,15 @@
+using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Domain.Branches;
 using WorkOrderManagement.Domain.Common;
 
 namespace WorkOrderManagement.Application.Features.Branches.Commands.ArchiveBranch;
 
-public class ArchiveBranchCommandHandler(IApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
+public class ArchiveBranchCommandHandler(IBranchRepository branchRepository, ICurrentUserProvider currentUserProvider)
     : ICommandHandler<ArchiveBranchCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(ArchiveBranchCommand command, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches.FirstOrDefaultAsync(b => b.Id == command.BranchId, cancellationToken);
+        var branch = await branchRepository.GetEntityByIdAsync(command.BranchId, cancellationToken: cancellationToken);
 
         if (branch is null)
             return BranchErrors.NotFound;
@@ -21,9 +22,9 @@ public class ArchiveBranchCommandHandler(IApplicationDbContext dbContext, ICurre
         }
         catch (InvalidOperationException) { }
 
-        branch.Archive(userId);
+        ((IArchivable)branch).Archive(userId);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await branchRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }

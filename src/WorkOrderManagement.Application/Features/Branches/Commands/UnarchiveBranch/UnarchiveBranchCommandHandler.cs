@@ -1,25 +1,22 @@
-using WorkOrderManagement.Application.Common.Interfaces;
+using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Domain.Branches;
 using WorkOrderManagement.Domain.Common;
-using Microsoft.EntityFrameworkCore;
 
 namespace WorkOrderManagement.Application.Features.Branches.Commands.UnarchiveBranch;
 
-public class UnarchiveBranchCommandHandler(IApplicationDbContext dbContext)
+public class UnarchiveBranchCommandHandler(IBranchRepository branchRepository)
     : ICommandHandler<UnarchiveBranchCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(UnarchiveBranchCommand command, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(b => b.Id == command.BranchId, cancellationToken);
+        var branch = await branchRepository.GetEntityByIdAsync(command.BranchId, includeArchived: true, cancellationToken: cancellationToken);
 
         if (branch is null)
             return BranchErrors.NotFound;
 
-        branch.Unarchive();
+        ((IArchivable)branch).Unarchive();
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await branchRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }

@@ -2,29 +2,11 @@ using WorkOrderManagement.Application.Features.Employees.DTOs;
 
 namespace WorkOrderManagement.Application.Features.Employees.Queries.GetEmployees;
 
-public class GetEmployeesQueryHandler(IApplicationDbContext dbContext) : IQueryHandler<GetEmployeesQuery, ErrorOr<List<EmployeeResponse>>>
+public class GetEmployeesQueryHandler(IEmployeeRepository employeeRepository) : IQueryHandler<GetEmployeesQuery, ErrorOr<List<EmployeeResponse>>>
 {
     public async Task<ErrorOr<List<EmployeeResponse>>> HandleAsync(GetEmployeesQuery query, CancellationToken cancellationToken)
     {
-        var employees = await dbContext.Employees
-            .AsNoTracking()
-            .Select(e => new EmployeeResponse
-            (
-                Id: e.Id,
-                Code: e.Code,
-                FirstName: e.FirstName,
-                LastName: e.LastName,
-                DocumentType: e.DocumentIdentifier.Type,
-                DocumentNumber: e.DocumentIdentifier.Number,
-                Email: e.Email != null ? e.Email.Value.Value : null,
-                Phone: e.Phone != null ? e.Phone.Value.Value : null,
-                Department: e.Department,
-                Position: e.Position,
-                PhotoUrl: e.PhotoUrl
-            ))
-            .ToListAsync(cancellationToken);
-
-        return employees;
+        return await employeeRepository.GetEmployeesAsync(cancellationToken);
     }
 }
 

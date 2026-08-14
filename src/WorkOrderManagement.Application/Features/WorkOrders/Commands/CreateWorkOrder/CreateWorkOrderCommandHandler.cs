@@ -1,39 +1,39 @@
 using ErrorOr;
-using Microsoft.EntityFrameworkCore;
 using WorkOrderManagement.Application.Common.Interfaces;
 using WorkOrderManagement.Application.Common.Messaging;
+using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Application.Features.WorkOrders.DTOs;
+using WorkOrderManagement.Application.Features.WorkOrders.Queries.GetWorkOrders;
 using WorkOrderManagement.Domain.WorkOrders;
 
 namespace WorkOrderManagement.Application.Features.WorkOrders.Commands.CreateWorkOrder;
 
-public class CreateWorkOrderCommandHandler(IApplicationDbContext dbContext) 
+public class CreateWorkOrderCommandHandler(
+    IWorkOrderRepository workOrderRepository,
+    IBranchRepository branchRepository,
+    IUserAccountService userAccountService) 
     : ICommandHandler<CreateWorkOrderCommand, ErrorOr<WorkOrderResponse>>
 {
     public async Task<ErrorOr<WorkOrderResponse>> HandleAsync(CreateWorkOrderCommand command, CancellationToken cancellationToken)
     {
-        var branch = await dbContext.Branches
-            .AsNoTracking()
-            .FirstOrDefaultAsync(b => b.Id == command.BranchId, cancellationToken);
+        var branch = await branchRepository.GetByIdAsync(command.BranchId, cancellationToken);
 
         if (branch == null)
         {
             return Error.NotFound("Branch.NotFound", "La sede especificada no existe.");
         }
 
-        var creatorUser = await dbContext.ApplicationUsers
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == command.CreatedByUserId, cancellationToken);
+        var creatorUserResult = await userAccountService.GetUserByIdAsync(command.CreatedByUserId, cancellationToken);
 
-        if (creatorUser == null)
+        if (creatorUserResult.IsError)
         {
             return Error.NotFound("User.NotFound", "El usuario solicitante no existe.");
         }
 
-        // Generar número de ticket único: SOL-YYYYMMDD-XXXX
+        var creatorUser = creatorUserResult.Value;
+
         var todayPrefix = $"SOL-{DateTime.UtcNow:yyyyMMdd}-";
-        var countToday = await dbContext.WorkOrders
-            .CountAsync(w => w.TicketNumber.StartsWith(todayPrefix), cancellationToken);
+        var countToday = await workOrderRepository.CountTicketNumbersAsync(todayPrefix, cancellationToken);
 
         var ticketNumber = $"{todayPrefix}{(countToday + 1):D4}";
 
@@ -56,8 +56,8 @@ public class CreateWorkOrderCommandHandler(IApplicationDbContext dbContext)
 
         var workOrder = workOrderResult.Value;
 
-        dbContext.WorkOrders.Add(workOrder);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await workOrderRepository.AddAsync(workOrder, cancellationToken);
+        await workOrderRepository.SaveChangesAsync(cancellationToken);
 
         return new WorkOrderResponse(
             workOrder.Id,

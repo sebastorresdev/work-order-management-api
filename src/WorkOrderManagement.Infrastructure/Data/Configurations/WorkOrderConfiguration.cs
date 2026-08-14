@@ -101,6 +101,11 @@ internal class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrder>
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.RequestType);
         builder.HasIndex(x => x.Created);
+
+        // Composite indexes for the most common access patterns in the dashboard and list endpoints.
+        builder.HasIndex(x => new { x.BranchId, x.Status, x.Created });
+        builder.HasIndex(x => new { x.CreatedByUserId, x.Status, x.Created });
+        builder.HasIndex(x => new { x.Status, x.RequestType, x.Created });
     }
 }
 

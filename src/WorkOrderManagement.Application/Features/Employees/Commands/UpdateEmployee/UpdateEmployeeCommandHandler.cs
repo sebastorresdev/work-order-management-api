@@ -1,13 +1,13 @@
+using WorkOrderManagement.Application.Features.Employees.Queries.GetEmployees;
 using WorkOrderManagement.Domain.Employees;
-using Microsoft.EntityFrameworkCore;
 
 namespace WorkOrderManagement.Application.Features.Employees.Commands.UpdateEmployee;
 
-public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICommandHandler<UpdateEmployeeCommand, ErrorOr<Success>>
+public class UpdateEmployeeCommandHandler(IEmployeeRepository employeeRepository) : ICommandHandler<UpdateEmployeeCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(UpdateEmployeeCommand command, CancellationToken cancellationToken)
     {
-        var employee = await dbContext.Employees.FirstOrDefaultAsync(e => e.Id == command.Id, cancellationToken);
+        var employee = await employeeRepository.GetEntityByIdAsync(command.Id, cancellationToken);
 
         if (employee is null)
         {
@@ -21,7 +21,7 @@ public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
 
         if (employee.DocumentIdentifier.Type != documentIdentifier.Type || employee.DocumentIdentifier.Number != documentIdentifier.Number)
         {
-            if (await dbContext.Employees.AnyAsync(e => e.DocumentIdentifier.Type == documentIdentifier.Type && e.DocumentIdentifier.Number == documentIdentifier.Number && e.Id != command.Id, cancellationToken))
+            if (await employeeRepository.ExistsByDocumentAsync(documentIdentifier, command.Id, cancellationToken))
             {
                 return EmployeeErrors.DocumentExists(command.DocumentNumber);
             }
@@ -41,7 +41,7 @@ public class UpdateEmployeeCommandHandler(IApplicationDbContext dbContext) : ICo
 
         if (updateResult.IsError) return updateResult.Errors;
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await employeeRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
     }

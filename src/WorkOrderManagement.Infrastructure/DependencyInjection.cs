@@ -92,6 +92,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
         builder.Services.AddScoped<IUserAccountService, IdentityUserAccountService>();
         builder.Services.AddScoped<IRoleService, IdentityRoleService>();
+        builder.Services.AddScoped<WorkOrderManagement.Application.Features.WorkOrders.Queries.GetWorkOrders.IWorkOrderRepository, WorkOrderManagement.Infrastructure.Repositories.WorkOrderRepository>();
+        builder.Services.AddScoped<WorkOrderManagement.Application.Features.Branches.Queries.GetBranches.IBranchRepository, WorkOrderManagement.Infrastructure.Repositories.BranchRepository>();
+        builder.Services.AddScoped<WorkOrderManagement.Application.Features.Employees.Queries.GetEmployees.IEmployeeRepository, WorkOrderManagement.Infrastructure.Repositories.EmployeeRepository>();
 
         return builder;
     }

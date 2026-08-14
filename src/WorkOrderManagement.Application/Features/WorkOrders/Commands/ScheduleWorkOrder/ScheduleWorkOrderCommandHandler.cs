@@ -1,19 +1,15 @@
 using ErrorOr;
-using Microsoft.EntityFrameworkCore;
-using WorkOrderManagement.Application.Common.Interfaces;
 using WorkOrderManagement.Application.Common.Messaging;
+using WorkOrderManagement.Application.Features.WorkOrders.Queries.GetWorkOrders;
 
 namespace WorkOrderManagement.Application.Features.WorkOrders.Commands.ScheduleWorkOrder;
 
-public class ScheduleWorkOrderCommandHandler(IApplicationDbContext dbContext)
+public class ScheduleWorkOrderCommandHandler(IWorkOrderRepository workOrderRepository)
     : ICommandHandler<ScheduleWorkOrderCommand, ErrorOr<Success>>
 {
     public async Task<ErrorOr<Success>> HandleAsync(ScheduleWorkOrderCommand command, CancellationToken cancellationToken)
     {
-        var workOrder = await dbContext.WorkOrders
-            .Include(w => w.StatusHistory)
-            .Include(w => w.ScheduleHistory)
-            .FirstOrDefaultAsync(w => w.Id == command.WorkOrderId, cancellationToken);
+        var workOrder = await workOrderRepository.GetByIdAsync(command.WorkOrderId, cancellationToken);
 
         if (workOrder == null)
         {
@@ -29,7 +25,7 @@ public class ScheduleWorkOrderCommandHandler(IApplicationDbContext dbContext)
 
         if (result.IsError) return result.Errors;
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await workOrderRepository.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
