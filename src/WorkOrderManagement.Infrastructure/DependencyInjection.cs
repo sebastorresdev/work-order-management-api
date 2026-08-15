@@ -46,6 +46,7 @@ public static class DependencyInjection
 
             opt.UseNpgsql(connectionString).AddInterceptors(interceptors);
             opt.UseSnakeCaseNamingConvention();
+            opt.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         // Enriquecimiento para integración con .NET Aspire
