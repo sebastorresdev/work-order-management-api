@@ -4,9 +4,12 @@ using System.Security.Claims;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using Npgsql;
 
 using WorkOrderManagement.Application.Common.Security;
 using WorkOrderManagement.Application.Common.Security.Roles;
@@ -17,14 +20,44 @@ namespace WorkOrderManagement.Infrastructure.Data;
 
 public static class InitialiserExtensions
 {
+    /// <summary>
+    /// Tiempo máximo permitido para toda la inicialización de la base de datos (resolución de
+    /// servicios, migraciones y seed). Si se supera, se lanza una excepción explícita en vez de
+    /// dejar que el arranque de la aplicación quede colgado en silencio (por ejemplo, ante un
+    /// ciclo de dependencias en el contenedor de DI o una base de datos inalcanzable que no
+    /// respeta los timeouts configurados en la cadena de conexión).
+    /// </summary>
+    private static readonly TimeSpan InitialisationTimeout = TimeSpan.FromSeconds(30);
+
     public static async Task InitialiseDatabaseAsync(this WebApplication app)
     {
-        using IServiceScope scope = app.Services.CreateScope();
+        var logger = app.Services.GetRequiredService<ILogger<ApplicationDbContextInitialiser>>();
 
-        ApplicationDbContextInitialiser initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        var initialisationTask = Task.Run(async () =>
+        {
+            using IServiceScope scope = app.Services.CreateScope();
 
-        await initialiser.InitialiseAsync();
-        await initialiser.SeedAsync();
+            ApplicationDbContextInitialiser initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+
+            await initialiser.InitialiseAsync();
+            await initialiser.SeedAsync();
+        });
+
+        var completedTask = await Task.WhenAny(initialisationTask, Task.Delay(InitialisationTimeout));
+
+        if (completedTask != initialisationTask)
+        {
+            var message = $"La inicialización de la base de datos superó el tiempo máximo permitido de {InitialisationTimeout.TotalSeconds}s sin completarse ni lanzar una excepción. " +
+                "Esto suele indicar un cuelgue silencioso, no un error de red: revisa primero si existe un ciclo de dependencias en el contenedor de DI " +
+                "(por ejemplo, un servicio usado por los SaveChangesInterceptor de ApplicationDbContext que depende de IApplicationDbContext por constructor). " +
+                "Si el ciclo de DI queda descartado, revisa la disponibilidad de PostgreSQL (host/puerto/base de datos) en la cadena de conexión configurada.";
+
+            logger.LogCritical(message);
+            throw new TimeoutException(message);
+        }
+
+        // Propaga cualquier excepción real ocurrida dentro de la tarea (conexión, migraciones, seed, etc.).
+        await initialisationTask;
     }
 }
 
@@ -52,15 +85,59 @@ public class ApplicationDbContextInitialiser
 
     public async Task InitialiseAsync()
     {
+        var connectionString = _context.Database.GetConnectionString();
+        var host = GetConnectionStringValue(connectionString, "Host") ?? "localhost";
+        var database = GetConnectionStringValue(connectionString, "Database") ?? "WorkOrderManagement";
+
         try
         {
+            var canConnect = await _context.Database.CanConnectAsync();
+            if (!canConnect)
+            {
+                throw new InvalidOperationException($"No se pudo establecer una conexión real a PostgreSQL en Host={host}; Database={database}.");
+            }
+
             await _context.Database.MigrateAsync();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is NpgsqlException or TimeoutException or InvalidOperationException)
         {
-            _logger.LogError(ex, "An error occurred while initialising the database.");
-            throw;
+            _logger.LogCritical(
+                ex,
+                "No se pudo inicializar PostgreSQL. Verifica que el contenedor o servidor esté levantado en Host={Host}, Port={Port}, Database={Database}. La API no puede arrancar sin la base de datos disponible.",
+                GetConnectionStringValue(connectionString, "Host") ?? "localhost",
+                GetConnectionStringValue(connectionString, "Port") ?? "5433",
+                GetConnectionStringValue(connectionString, "Database") ?? "WorkOrderManagement");
+
+            throw new InvalidOperationException(
+                $"La API no pudo conectarse a PostgreSQL. Revisa que el contenedor/servidor esté levantado en Host={host}; Port={GetConnectionStringValue(connectionString, "Port") ?? "5433"}; Database={database}. Si usas Aspire, asegúrate de levantar el AppHost y que el servicio postgres esté activo.",
+                ex);
         }
+    }
+
+    private static string? GetConnectionStringValue(string? connectionString, string key)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return null;
+        }
+
+        foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var idx = part.IndexOf('=');
+            if (idx <= 0)
+            {
+                continue;
+            }
+
+            var name = part[..idx];
+            var value = part[(idx + 1)..];
+            if (string.Equals(name, key, StringComparison.OrdinalIgnoreCase))
+            {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     public async Task SeedAsync()

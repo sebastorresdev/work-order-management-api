@@ -6,8 +6,10 @@ namespace WorkOrderManagement.Application.Features.Auth.DTOs;
 /// <param name="Id">Identificador único del usuario.</param>
 /// <param name="Roles">Lista de roles asignados al usuario.</param>
 /// <param name="Permissions">Lista de claves de permisos otorgados al usuario.</param>
+/// <param name="BranchIds">Lista de identificadores de las sedes asignadas al usuario.</param>
 public record CurrentUserResponse(
     Guid Id,
     IReadOnlyList<string> Roles,
-    IReadOnlyList<string> Permissions);
+    IReadOnlyList<string> Permissions,
+    IReadOnlyList<Guid> BranchIds);
 

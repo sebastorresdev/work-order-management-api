@@ -40,14 +40,14 @@ public sealed record WorkOrderAccessScope(
 
         if (isBackoffice)
         {
-            if (query.BranchId.HasValue)
-            {
-                return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, query.BranchId.Value);
-            }
-
             if (currentUserBranchId.HasValue)
             {
                 return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, currentUserBranchId.Value);
+            }
+
+            if (query.BranchId.HasValue)
+            {
+                return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, query.BranchId.Value);
             }
 
             return new WorkOrderAccessScope(WorkOrderAccessMode.All);

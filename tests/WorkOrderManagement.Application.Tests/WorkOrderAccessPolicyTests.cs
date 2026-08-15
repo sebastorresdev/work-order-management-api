@@ -54,6 +54,25 @@ public class WorkOrderAccessPolicyTests
     }
 
     [Fact]
+    public void ResolveScope_WhenUserIsBackofficeAndHasBranchAssigned_ReturnsAssignedBranchScope()
+    {
+        var currentUserId = Guid.NewGuid();
+        var assignedBranchId = Guid.NewGuid();
+        var requestedBranchId = Guid.NewGuid();
+
+        var query = new GetWorkOrdersQuery(
+            CurrentUserId: currentUserId,
+            UserRoles: ["Backoffice"],
+            BranchId: requestedBranchId);
+
+        var result = WorkOrderAccessPolicy.ResolveScope(query, assignedBranchId, []);
+
+        result.Mode.Should().Be(WorkOrderAccessMode.ByBranch);
+        result.BranchId.Should().Be(assignedBranchId);
+        result.BranchId.Should().NotBe(requestedBranchId);
+    }
+
+    [Fact]
     public void ResolveScope_WhenUserHasNoRoles_ReturnsAllScope()
     {
         var query = new GetWorkOrdersQuery(CurrentUserId: Guid.NewGuid(), UserRoles: []);

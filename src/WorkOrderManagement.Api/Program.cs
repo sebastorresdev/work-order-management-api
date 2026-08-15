@@ -8,6 +8,8 @@ using WorkOrderManagement.Infrastructure;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information) // 👈 Permite ver peticiones HTTP y rutas
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .Enrich.WithProperty("Application", "WorkOrderManagement.Api")
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")

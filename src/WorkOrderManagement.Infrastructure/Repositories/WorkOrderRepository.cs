@@ -12,10 +12,25 @@ public class WorkOrderRepository(IApplicationDbContext dbContext) : IWorkOrderRe
 {
     public async Task<Guid?> GetUserBranchIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await dbContext.ApplicationUsers
-            .Where(u => u.Id == userId)
-            .Select(u => u.BranchId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var user = await dbContext.ApplicationUsers
+            .Include(u => u.BranchUsers)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user is null)
+        {
+            return null;
+        }
+
+        if (user.BranchId.HasValue)
+        {
+            return user.BranchId.Value;
+        }
+
+        var assignedBranchId = user.BranchUsers
+            .Select(bu => bu.BranchId)
+            .FirstOrDefault();
+
+        return assignedBranchId == Guid.Empty ? null : assignedBranchId;
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetSubordinateUserIdsAsync(Guid supervisorId, CancellationToken cancellationToken = default)
