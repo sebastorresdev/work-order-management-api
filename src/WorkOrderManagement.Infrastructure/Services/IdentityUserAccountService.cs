@@ -383,5 +383,32 @@ public class IdentityUserAccountService(
 
         return result;
     }
+
+    public async Task<ErrorOr<List<UserResponse>>> GetTechniciansAsync(Guid? branchId, CancellationToken cancellationToken)
+    {
+        var query = userManager.Users
+            .Where(u => u.IsActive && u.UserRoles.Any(ur => ur.Role.Name == "Técnico" || ur.Role.Name == "Tecnico"));
+
+        if (branchId.HasValue && branchId.Value != Guid.Empty)
+        {
+            query = query.Where(u => u.BranchId == branchId.Value || u.BranchUsers.Any(bu => bu.BranchId == branchId.Value));
+        }
+
+        List<UserResponse> technicians = await query
+            .OrderBy(u => u.NormalizedUserName)
+            .Select(u => new UserResponse(
+                Id: u.Id,
+                UserName: !string.IsNullOrWhiteSpace(u.DisplayName) ? u.DisplayName : u.UserName!,
+                IsActive: u.IsActive,
+                BranchName: u.BranchUsers.Select(bu => bu.Branch.Name).FirstOrDefault() ?? "",
+                RoleNames: u.UserRoles.Select(ur => ur.Role.Name!).ToList(),
+                Email: u.Email,
+                PhotoUrl: u.ProfilePhotoUrl,
+                LastModifiedAt: u.LastModifiedAt
+            ))
+            .ToListAsync(cancellationToken);
+
+        return technicians;
+    }
 }
 

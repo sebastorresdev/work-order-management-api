@@ -256,6 +256,34 @@ public class WorkOrder : BaseAuditableEntity
         return Result.Success;
     }
 
+    public ErrorOr<Success> ResolveObservation(string resolutionNotes, Guid updatedByUserId)
+    {
+        if (Status != WorkOrderStatus.Observado)
+        {
+            return Error.Validation("WorkOrder.NotInObservedStatus", "La orden no se encuentra en estado Observado.");
+        }
+
+        if (string.IsNullOrWhiteSpace(resolutionNotes))
+        {
+            return Error.Validation("WorkOrder.ResolutionNotesRequired", "La nota de subsanación es requerida.");
+        }
+
+        var oldStatus = Status;
+        Status = WorkOrderStatus.Pendiente;
+        ObservationNotes = null;
+        LastModified = DateTimeOffset.UtcNow;
+        LastModifiedBy = updatedByUserId;
+
+        _statusHistory.Add(WorkOrderStatusHistory.Create(
+            Id,
+            oldStatus,
+            WorkOrderStatus.Pendiente,
+            $"Observación subsanada: {resolutionNotes.Trim()}",
+            updatedByUserId));
+
+        return Result.Success;
+    }
+
     public ErrorOr<Success> Reject(string reason, Guid updatedByUserId)
     {
         if (string.IsNullOrWhiteSpace(reason))

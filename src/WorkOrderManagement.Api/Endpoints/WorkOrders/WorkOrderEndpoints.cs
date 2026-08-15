@@ -73,6 +73,12 @@ public sealed class WorkOrderEndpoints : IEndpoint
             .WithSummary("Cancelar orden de trabajo (Vendedor / Backoffice)")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/{id:guid}/resolve-observation", ResolveObservation)
+            .WithName("ResolveObservation")
+            .WithSummary("Subsanar/Responder observación de una orden de trabajo (Vendedor)")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> GetWorkOrders(
@@ -242,6 +248,19 @@ public sealed class WorkOrderEndpoints : IEndpoint
         var result = await handler.HandleAsync(command, cancellationToken);
         return result.Match(_ => TypedResults.NoContent(), errors => errors.ToProblem());
     }
+
+    private static async Task<IResult> ResolveObservation(
+        Guid id,
+        ResolveObservationApiRequest request,
+        ICurrentUserProvider currentUserProvider,
+        ICommandHandler<WorkOrderManagement.Application.Features.WorkOrders.Commands.ResolveObservation.ResolveObservationCommand, ErrorOr<Success>> handler,
+        CancellationToken cancellationToken)
+    {
+        var currentUser = currentUserProvider.GetCurrentUser();
+        var command = new WorkOrderManagement.Application.Features.WorkOrders.Commands.ResolveObservation.ResolveObservationCommand(id, request.ResolutionNotes, currentUser.Id);
+        var result = await handler.HandleAsync(command, cancellationToken);
+        return result.Match(_ => TypedResults.NoContent(), errors => errors.ToProblem());
+    }
 }
 
 public record CreateWorkOrderApiRequest(
@@ -278,3 +297,5 @@ public record ScheduleWorkOrderApiRequest(
 public record ReasonApiRequest(string Reason);
 
 public record CompleteWorkOrderApiRequest(string? CompletionNotes);
+
+public record ResolveObservationApiRequest(string ResolutionNotes);

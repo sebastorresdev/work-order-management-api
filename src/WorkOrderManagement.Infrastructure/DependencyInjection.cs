@@ -39,7 +39,7 @@ public static class DependencyInjection
         {
             var interceptors = sp.GetServices<ISaveChangesInterceptor>();
 
-            string? connectionString = builder.Configuration.GetConnectionString("skvia-base-template-db");
+            string? connectionString = builder.Configuration.GetConnectionString("work-order-management-db");
 
             opt.UseNpgsql(connectionString).AddInterceptors(interceptors);
             opt.UseSnakeCaseNamingConvention();

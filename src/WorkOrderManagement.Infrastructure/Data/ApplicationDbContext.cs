@@ -65,6 +65,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<WorkOrderManagement.Domain.WorkOrders.WorkOrderScheduleHistory> WorkOrderScheduleHistories => Set<WorkOrderManagement.Domain.WorkOrders.WorkOrderScheduleHistory>();
 
     /// <summary>
+    /// Conjunto de datos para las notificaciones del sistema.
+    /// </summary>
+    public DbSet<WorkOrderManagement.Domain.Notifications.Notification> Notifications => Set<WorkOrderManagement.Domain.Notifications.Notification>();
+
+    /// <summary>
     /// Fachada de la base de datos subyacente.
     /// </summary>
     public override DatabaseFacade Database => base.Database;

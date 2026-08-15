@@ -277,6 +277,20 @@ public class ApplicationDbContextInitialiser
             }
         }
 
+        // ROL TÉCNICO
+        var technicianRole = await _roleManager.FindByNameAsync(Roles.Technician);
+        if (technicianRole is null)
+        {
+            technicianRole = new ApplicationRole
+            {
+                Name = Roles.Technician,
+                Description = "Rol de Técnico de campo para asignación de órdenes de trabajo",
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+            };
+            await _roleManager.CreateAsync(technicianRole);
+        }
+
         if (!await _roleManager.RoleExistsAsync("basic"))
         {
             await _roleManager.CreateAsync(new ApplicationRole { Name = "basic" });

@@ -1,9 +1,11 @@
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 using WorkOrderManagement.Application.Common.Interfaces;
 using WorkOrderManagement.Application.Common.Messaging;
 using WorkOrderManagement.Application.Features.Branches.Queries.GetBranches;
 using WorkOrderManagement.Application.Features.WorkOrders.DTOs;
 using WorkOrderManagement.Application.Features.WorkOrders.Queries.GetWorkOrders;
+using WorkOrderManagement.Domain.Notifications;
 using WorkOrderManagement.Domain.WorkOrders;
 
 namespace WorkOrderManagement.Application.Features.WorkOrders.Commands.CreateWorkOrder;
@@ -11,7 +13,8 @@ namespace WorkOrderManagement.Application.Features.WorkOrders.Commands.CreateWor
 public class CreateWorkOrderCommandHandler(
     IWorkOrderRepository workOrderRepository,
     IBranchRepository branchRepository,
-    IUserAccountService userAccountService) 
+    IUserAccountService userAccountService,
+    IApplicationDbContext dbContext) 
     : ICommandHandler<CreateWorkOrderCommand, ErrorOr<WorkOrderResponse>>
 {
     public async Task<ErrorOr<WorkOrderResponse>> HandleAsync(CreateWorkOrderCommand command, CancellationToken cancellationToken)
@@ -58,6 +61,29 @@ public class CreateWorkOrderCommandHandler(
 
         await workOrderRepository.AddAsync(workOrder, cancellationToken);
         await workOrderRepository.SaveChangesAsync(cancellationToken);
+
+        // Notificar únicamente al personal de Backoffice/Admin asignado a esta sede
+        var branchBackofficeUserIds = await dbContext.ApplicationUsers
+            .Where(u => u.IsActive && u.Id != command.CreatedByUserId &&
+                (u.BranchId == command.BranchId || u.BranchUsers.Any(bu => bu.BranchId == command.BranchId)) &&
+                u.UserRoles.Any(ur => ur.Role.Name == "Backoffice" || ur.Role.Name == "Administrator" || ur.Role.Name == "Admin"))
+            .Select(u => u.Id)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        foreach (var userId in branchBackofficeUserIds)
+        {
+            var notification = Notification.Create(
+                userId,
+                "Nueva Solicitud Registrada",
+                $"Se registró la solicitud {workOrder.TicketNumber} en tu sede {branch.Name}.",
+                workOrder.Id,
+                "WorkOrderCreated");
+
+            dbContext.Notifications.Add(notification);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return new WorkOrderResponse(
             workOrder.Id,

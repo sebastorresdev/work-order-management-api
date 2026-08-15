@@ -2,27 +2,37 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(ar
 
 var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
 
-// 🚀 1. Creamos el contenedor de PostgreSQL con su nombre técnico
+// 🚀 1. Contenedor de PostgreSQL
 var postgresServer = builder.AddPostgres("postgres", password: postgresPassword)
     .WithImage("postgres")
     .WithImageTag("16")
     .WithHostPort(5433)
-    .WithLifetime(ContainerLifetime.Persistent) // 💾 ¡NUEVO! Mantiene tus productos y usuarios vivos al reiniciar Aspire
+    .WithLifetime(ContainerLifetime.Persistent)
     .WithPgAdmin();
 
-// 🚀 2. Declaramos la base de datos específica dentro del servidor Postgres
-var database = postgresServer.AddDatabase("skvia-base-template-db");
+// 🚀 2. Base de datos específica del dominio
+var database = postgresServer.AddDatabase("work-order-management-db");
 
-// 🚀 3. Agregamos el proyecto WebApi y le inyectamos la referencia de la base de datos
-builder.AddProject<Projects.WorkOrderManagement_Api>("skvia-base-template-api")
+// 🚀 3. API Backend (.NET 10)
+var api = builder.AddProject<Projects.WorkOrderManagement_Api>("work-order-management-api")
     .WithReference(database)
-    .WaitFor(database) // ⏳ ¡NUEVO! Espera a que el contenedor de Postgres esté 100% en verde antes de encender la API (evita errores de conexión al arrancar)
+    .WaitFor(database)
     .WithExternalHttpEndpoints()
-    .WithUrlForEndpoint("https", url => // 🪄 ¡NUEVO! Te genera un enlace directo con clic en el dashboard para probar tus endpoints
+    .WithUrlForEndpoint("https", url =>
     {
         url.DisplayText = "Scalar API Reference";
-        url.Url = "/scalar"; // Apunta a tu documentación interactiva
-    }); ; // 🔥 Aspire amarra el ConnectionString automáticamente aquí
+        url.Url = "/scalar";
+    });
+
+// 🚀 4. Frontend Angular (Ruta absoluta desde AppHostDirectory)
+var frontendPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "../../../work-order-management-frontend"));
+
+builder.AddNpmApp("work-order-management-frontend", frontendPath, scriptName: "start")
+    .WithReference(api)
+    .WaitFor(api)
+    .WithHttpEndpoint(port: 4200, targetPort: 4200, isProxied: false)
+    .WithExternalHttpEndpoints();
 
 builder.Build().Run();
+
 

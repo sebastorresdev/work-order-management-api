@@ -58,6 +58,11 @@ public interface IApplicationDbContext
     DbSet<Domain.WorkOrders.WorkOrderScheduleHistory> WorkOrderScheduleHistories { get; }
 
     /// <summary>
+    /// Conjunto de datos para las notificaciones del sistema.
+    /// </summary>
+    DbSet<Domain.Notifications.Notification> Notifications { get; }
+
+    /// <summary>
     /// Fachada de la base de datos para administración de transacciones y ejecuciones directas.
     /// </summary>
     DatabaseFacade Database { get; }

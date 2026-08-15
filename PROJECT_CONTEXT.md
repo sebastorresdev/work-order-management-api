@@ -1,40 +1,40 @@
-# 📋 PROJECT CONTEXT: Sistema de Control de Asistencia (Intranet)
+# 📋 PROJECT CONTEXT: Sistema de Gestión de Órdenes de Trabajo (Work Order Management)
 
 ## 🎯 Visión General del Proyecto
-Sistema web interno de gestión y control de asistencia para personal, diseñado inicialmente como MVP para un caso de uso real (empresa/negocio) y preparado arquitectónicamente para escalar a futuro como un producto comercializable (SaaS / Multi-tenant).
+Sistema web interno para la gestión, asignación, seguimiento y control de órdenes de trabajo (Work Orders), diseñado con arquitectura empresarial en .NET 10 y Angular, preparado arquitectónicamente para escalar como una plataforma multi-sede y comercializable (SaaS / Multi-tenant).
 
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Backend:** C# (.NET 10) usando **Minimal APIs** y **ASP.NET Core Identity**.
-- **Base de Datos:** **PostgreSQL** mediante **Entity Framework Core** (Migrations).
-- **Frontend:** **Angular** (Standalone Components) + **NG-ZORRO** (Ant Design UI Library) + **TypeScript**.
-- **Autenticación:** Tokens cifrados opacos / Cookies HttpOnly con un endpoint estandarizado `/api/auth/me` para la resolución de permisos, roles y datos del usuario en el cliente.
+- **Backend:** C# (.NET 10) usando **Minimal APIs**, **CQRS (MediatR)**, **FluentValidation** y **ASP.NET Core Identity**.
+- **Base de Datos:** **PostgreSQL** mediante **Entity Framework Core** (Npgsql con convención SnakeCase).
+- **Frontend:** **Angular** (Standalone Components) + **NG-ZORRO** (Ant Design UI Library) + **TypeScript** + **Vitest**.
+- **Orquestación & Observabilidad:** **.NET Aspire** (AppHost + ServiceDefaults + OpenTelemetry).
+- **Autenticación:** Tokens Bearer con endpoint estandarizado `/api/auth/me` para la resolución de permisos dinámicos, roles y datos del usuario.
 
 ---
 
 ## 🏗️ Decisiones de Arquitectura y Negocio
 
 ### 1. Modelo de Negocio e Identidad
-- **Sin Auto-Registro Público:** Es un sistema cerrado de gestión administrativa. La alta de empleados y asignación de credenciales (`UserName` y `Password` inicial) la realiza exclusivamente un Administrador / Recursos Humanos mediante `UserManager`.
-- **Estructura Actual:** **Multi-sede / Multi-sucursal**. Un usuario o empleado pertenece a una Sede específica de la organización.
-- **Preparado para Futuro Multi-tenant:** Diseñado de manera que en el futuro se pueda agregar la columna `EmpresaId` (Tenant) en las tablas principales y aplicar *Global Query Filters* en EF Core sin reescribir la aplicación.
+- **Sin Auto-Registro Público:** Es un sistema cerrado de gestión administrativa. La alta de empleados y asignación de credenciales la realiza exclusivamente un Administrador / Recursos Humanos.
+- **Estructura Actual:** **Multi-sede / Multi-sucursal (`Branch`)**. Un usuario o empleado pertenece a una Sucursal/Sede específica de la organización.
+- **Preparado para Futuro Multi-tenant:** Diseñado de manera que en el futuro se pueda agregar la columna `EmpresaId` (Tenant) en las tablas principales y aplicar *Global Query Filters* en EF Core.
 
 ### 2. Autenticación y Autorización
-- El login recibe credenciales locales (`userName`, `password`), valida la cuenta activa y emite el token de sesión.
-- El frontend (Angular) consulta `/api/auth/me` inmediatamente después de autenticarse para almacenar en un servicio global los datos del usuario, sus roles (`Admin`, `Supervisor`, `Empleado`) y su `SedeId`.
-- Angular utiliza un `HttpInterceptor` para enviar el Bearer Token en cada solicitud y un `Functional Guard` para proteger las rutas de la intranet.
+- El login recibe credenciales locales (`userName`, `password`), valida la cuenta activa y emite el token Bearer.
+- El frontend (Angular) consulta `/api/auth/me` inmediatamente después de autenticarse para almacenar en un servicio global los datos del usuario, sus roles (`Admin`, `Supervisor`, `Empleado`) y permisos dinámicos.
+- Angular utiliza un `HttpInterceptor` para enviar el Bearer Token en cada solicitud y `Functional Guards` para proteger las rutas.
 
 ---
 
 ## 🗄️ Modelo de Datos Básico (PostgreSQL / EF Core)
 
-1. **`Sedes`** (`Id`, `Nombre`, `Direccion`, `Estado`)
+1. **`Branches` / Sedes** (`Id`, `Code`, `Name`, `Address`, `IsActive`)
 2. **`ApplicationUser`** (Hereda de `IdentityUser`):
-   - `FirstName`, `LastName`, `Dni`, `IsActive`
-   - `SedeId` (FK a `Sedes`)
-3. **`Turnos`** (`Id`, `Nombre`, `HoraEntrada`, `HoraSalida`, `ToleranciaMinutos`, `SedeId`)
-4. **`Marcaciones`** (`Id`, `UserId` [FK], `FechaHora`, `TipoMarcacion` [Entrada/Salida], `SedeId`, `Observacion`)
+   - `FirstName`, `LastName`, `Dni`, `IsActive`, `BranchId`
+3. **`Employees`** (`Id`, `FirstName`, `LastName`, `DocumentIdentifier` [Value Object: `Type`, `Number`], `Email` [Value Object], `Phone` [Value Object], `BranchId`)
+4. **`WorkOrders`** (`Id`, `OrderNumber`, `Title`, `Description`, `Status` [`Draft`, `Assigned`, `InProgress`, `Completed`, `Cancelled`], `Priority` [`Low`, `Medium`, `High`, `Urgent`], `Type`, `AssignedEmployeeId`, `BranchId`, `Historiales` [`StatusHistory`, `ScheduleHistory`])
 
 ---
 

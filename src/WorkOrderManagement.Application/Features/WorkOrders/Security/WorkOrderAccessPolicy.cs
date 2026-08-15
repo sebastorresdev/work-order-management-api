@@ -12,12 +12,12 @@ public enum WorkOrderAccessMode
 
 public sealed record WorkOrderAccessScope(
     WorkOrderAccessMode Mode,
-    Guid? BranchId = null,
+    IReadOnlyCollection<Guid>? BranchIds = null,
     IReadOnlyCollection<Guid>? UserIds = null)
 {
     public static WorkOrderAccessScope ResolveScope(
         GetWorkOrdersQuery query,
-        Guid? currentUserBranchId,
+        IReadOnlyCollection<Guid> userBranchIds,
         IReadOnlyCollection<Guid> subordinateIds)
     {
         if (query.CurrentUserId is null || query.UserRoles is null || query.UserRoles.Count == 0)
@@ -34,20 +34,23 @@ public sealed record WorkOrderAccessScope(
         if (isSystemAdmin)
         {
             return query.BranchId.HasValue
-                ? new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, query.BranchId.Value)
+                ? new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, BranchIds: [query.BranchId.Value])
                 : new WorkOrderAccessScope(WorkOrderAccessMode.All);
         }
 
         if (isBackoffice)
         {
-            if (currentUserBranchId.HasValue)
-            {
-                return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, currentUserBranchId.Value);
-            }
-
             if (query.BranchId.HasValue)
             {
-                return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, query.BranchId.Value);
+                if (userBranchIds.Count == 0 || userBranchIds.Contains(query.BranchId.Value))
+                {
+                    return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, BranchIds: [query.BranchId.Value]);
+                }
+            }
+
+            if (userBranchIds.Count > 0)
+            {
+                return new WorkOrderAccessScope(WorkOrderAccessMode.ByBranch, BranchIds: userBranchIds);
             }
 
             return new WorkOrderAccessScope(WorkOrderAccessMode.All);
@@ -60,13 +63,21 @@ public sealed record WorkOrderAccessScope(
                 .Distinct()
                 .ToList();
 
-            return new WorkOrderAccessScope(WorkOrderAccessMode.ByTeam, null, userIds);
+            var branchFilter = query.BranchId.HasValue && (userBranchIds.Count == 0 || userBranchIds.Contains(query.BranchId.Value))
+                ? (IReadOnlyCollection<Guid>)[query.BranchId.Value]
+                : (userBranchIds.Count > 0 ? userBranchIds : null);
+
+            return new WorkOrderAccessScope(WorkOrderAccessMode.ByTeam, BranchIds: branchFilter, UserIds: userIds);
         }
+
+        var userBranchFilter = query.BranchId.HasValue && (userBranchIds.Count == 0 || userBranchIds.Contains(query.BranchId.Value))
+            ? (IReadOnlyCollection<Guid>)[query.BranchId.Value]
+            : (userBranchIds.Count > 0 ? userBranchIds : null);
 
         return new WorkOrderAccessScope(
             WorkOrderAccessMode.ByUser,
-            null,
-            [query.CurrentUserId.Value]);
+            BranchIds: userBranchFilter,
+            UserIds: [query.CurrentUserId.Value]);
     }
 }
 
@@ -74,7 +85,7 @@ public static class WorkOrderAccessPolicy
 {
     public static WorkOrderAccessScope ResolveScope(
         GetWorkOrdersQuery query,
-        Guid? currentUserBranchId,
+        IReadOnlyCollection<Guid> userBranchIds,
         IReadOnlyCollection<Guid> subordinateIds)
-        => WorkOrderAccessScope.ResolveScope(query, currentUserBranchId, subordinateIds);
+        => WorkOrderAccessScope.ResolveScope(query, userBranchIds, subordinateIds);
 }

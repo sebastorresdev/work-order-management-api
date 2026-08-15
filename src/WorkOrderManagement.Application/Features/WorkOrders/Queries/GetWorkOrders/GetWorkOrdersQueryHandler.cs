@@ -13,12 +13,12 @@ public class GetWorkOrdersQueryHandler(
 {
     public async Task<ErrorOr<PaginatedResponse<WorkOrderResponse>>> HandleAsync(GetWorkOrdersQuery query, CancellationToken cancellationToken)
     {
-        Guid? currentUserBranchId = null;
+        IReadOnlyCollection<Guid> userBranchIds = [];
         IReadOnlyCollection<Guid> subordinateIds = [];
 
         if (query.CurrentUserId.HasValue)
         {
-            currentUserBranchId = await workOrderRepository.GetUserBranchIdAsync(query.CurrentUserId.Value, cancellationToken);
+            userBranchIds = await workOrderRepository.GetUserBranchIdsAsync(query.CurrentUserId.Value, cancellationToken);
 
             if (query.UserRoles != null && query.UserRoles.Count > 0)
             {
@@ -31,7 +31,7 @@ public class GetWorkOrdersQueryHandler(
             }
         }
 
-        var accessScope = WorkOrderAccessPolicy.ResolveScope(query, currentUserBranchId, subordinateIds);
+        var accessScope = WorkOrderAccessPolicy.ResolveScope(query, userBranchIds, subordinateIds);
 
         return await workOrderRepository.GetPageAsync(query, accessScope, cancellationToken);
     }

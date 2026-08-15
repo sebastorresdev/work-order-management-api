@@ -15,10 +15,10 @@ public class WorkOrderAccessPolicyTests
             UserRoles: ["Admin"],
             BranchId: Guid.NewGuid());
 
-        var result = WorkOrderAccessPolicy.ResolveScope(query, null, []);
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [], []);
 
         result.Mode.Should().Be(WorkOrderAccessMode.ByBranch);
-        result.BranchId.Should().Be(query.BranchId);
+        result.BranchIds.Should().ContainSingle().Which.Should().Be(query.BranchId!.Value);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class WorkOrderAccessPolicyTests
             CurrentUserId: currentUserId,
             UserRoles: ["Supervisor"]);
 
-        var result = WorkOrderAccessPolicy.ResolveScope(query, null, [subordinateId]);
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [], [subordinateId]);
 
         result.Mode.Should().Be(WorkOrderAccessMode.ByTeam);
         result.UserIds.Should().Contain(currentUserId);
@@ -47,7 +47,7 @@ public class WorkOrderAccessPolicyTests
             CurrentUserId: currentUserId,
             UserRoles: ["Vendedor"]);
 
-        var result = WorkOrderAccessPolicy.ResolveScope(query, null, []);
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [], []);
 
         result.Mode.Should().Be(WorkOrderAccessMode.ByUser);
         result.UserIds.Should().ContainSingle().Which.Should().Be(currentUserId);
@@ -65,11 +65,30 @@ public class WorkOrderAccessPolicyTests
             UserRoles: ["Backoffice"],
             BranchId: requestedBranchId);
 
-        var result = WorkOrderAccessPolicy.ResolveScope(query, assignedBranchId, []);
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [assignedBranchId], []);
 
         result.Mode.Should().Be(WorkOrderAccessMode.ByBranch);
-        result.BranchId.Should().Be(assignedBranchId);
-        result.BranchId.Should().NotBe(requestedBranchId);
+        result.BranchIds.Should().ContainSingle().Which.Should().Be(assignedBranchId);
+        result.BranchIds.Should().NotContain(requestedBranchId);
+    }
+
+    [Fact]
+    public void ResolveScope_WhenUserHasMultipleBranchesAssigned_ReturnsAllAssignedBranchIds()
+    {
+        var currentUserId = Guid.NewGuid();
+        var branch1 = Guid.NewGuid();
+        var branch2 = Guid.NewGuid();
+        var branch3 = Guid.NewGuid();
+
+        var query = new GetWorkOrdersQuery(
+            CurrentUserId: currentUserId,
+            UserRoles: ["Backoffice"]);
+
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [branch1, branch2, branch3], []);
+
+        result.Mode.Should().Be(WorkOrderAccessMode.ByBranch);
+        result.BranchIds.Should().HaveCount(3);
+        result.BranchIds.Should().Contain([branch1, branch2, branch3]);
     }
 
     [Fact]
@@ -77,7 +96,7 @@ public class WorkOrderAccessPolicyTests
     {
         var query = new GetWorkOrdersQuery(CurrentUserId: Guid.NewGuid(), UserRoles: []);
 
-        var result = WorkOrderAccessPolicy.ResolveScope(query, null, []);
+        var result = WorkOrderAccessPolicy.ResolveScope(query, [], []);
 
         result.Mode.Should().Be(WorkOrderAccessMode.All);
     }

@@ -1,6 +1,6 @@
-# 🛠️ Skvia Base Template API (.NET 10 Web API)
+# 🛠️ WorkOrderManagement.Api (.NET 10 Web API)
 
-Plantilla backend empresarial desarrollada en .NET 10 con Clean Architecture, CQRS, ASP.NET Core Identity, JWT + Refresh Tokens, EF Core Interceptors, ErrorOr y Migraciones.
+Sistema backend de gestión de órdenes de trabajo desarrollado en .NET 10 con Clean Architecture, CQRS, ASP.NET Core Identity, EF Core Interceptors, ErrorOr y .NET Aspire.
 
 ---
 

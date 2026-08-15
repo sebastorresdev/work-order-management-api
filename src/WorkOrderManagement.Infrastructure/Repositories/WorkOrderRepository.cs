@@ -10,7 +10,7 @@ namespace WorkOrderManagement.Infrastructure.Repositories;
 
 public class WorkOrderRepository(IApplicationDbContext dbContext) : IWorkOrderRepository
 {
-    public async Task<Guid?> GetUserBranchIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Guid>> GetUserBranchIdsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await dbContext.ApplicationUsers
             .Include(u => u.BranchUsers)
@@ -18,19 +18,22 @@ public class WorkOrderRepository(IApplicationDbContext dbContext) : IWorkOrderRe
 
         if (user is null)
         {
-            return null;
+            return [];
         }
+
+        var branchIds = new List<Guid>();
 
         if (user.BranchId.HasValue)
         {
-            return user.BranchId.Value;
+            branchIds.Add(user.BranchId.Value);
         }
 
-        var assignedBranchId = user.BranchUsers
-            .Select(bu => bu.BranchId)
-            .FirstOrDefault();
+        if (user.BranchUsers != null && user.BranchUsers.Count > 0)
+        {
+            branchIds.AddRange(user.BranchUsers.Select(bu => bu.BranchId));
+        }
 
-        return assignedBranchId == Guid.Empty ? null : assignedBranchId;
+        return branchIds.Where(id => id != Guid.Empty).Distinct().ToList();
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetSubordinateUserIdsAsync(Guid supervisorId, CancellationToken cancellationToken = default)

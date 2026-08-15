@@ -7,7 +7,7 @@ namespace WorkOrderManagement.Application.Features.WorkOrders.Queries.GetWorkOrd
 
 public interface IWorkOrderRepository
 {
-    Task<Guid?> GetUserBranchIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<Guid>> GetUserBranchIdsAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<Guid>> GetSubordinateUserIdsAsync(Guid supervisorId, CancellationToken cancellationToken = default);
 

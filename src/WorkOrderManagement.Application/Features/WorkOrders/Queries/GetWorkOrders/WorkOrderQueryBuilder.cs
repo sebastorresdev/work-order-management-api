@@ -12,16 +12,22 @@ public static class WorkOrderQueryBuilder
     {
         var scopedQuery = accessScope.Mode switch
         {
-            WorkOrderAccessMode.ByBranch when accessScope.BranchId.HasValue =>
-                queryable.Where(w => w.BranchId == accessScope.BranchId.Value),
+            WorkOrderAccessMode.ByBranch when accessScope.BranchIds is { Count: > 0 } =>
+                queryable.Where(w => accessScope.BranchIds.Contains(w.BranchId)),
 
             WorkOrderAccessMode.ByTeam when accessScope.UserIds is { Count: > 0 } =>
-                queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId)),
+                accessScope.BranchIds is { Count: > 0 }
+                    ? queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId) && accessScope.BranchIds.Contains(w.BranchId))
+                    : queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId)),
 
             WorkOrderAccessMode.ByUser when accessScope.UserIds is { Count: > 0 } =>
-                queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId)),
+                accessScope.BranchIds is { Count: > 0 }
+                    ? queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId) && accessScope.BranchIds.Contains(w.BranchId))
+                    : queryable.Where(w => accessScope.UserIds.Contains(w.CreatedByUserId)),
 
-            _ => queryable
+            _ => accessScope.BranchIds is { Count: > 0 }
+                ? queryable.Where(w => accessScope.BranchIds.Contains(w.BranchId))
+                : queryable
         };
 
         if (query.Status.HasValue)

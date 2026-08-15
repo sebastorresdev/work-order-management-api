@@ -29,5 +29,10 @@ public static class Roles
     /// Rol de Supervisor para supervisar equipos de vendedores y trabajos de la sede.
     /// </summary>
     public const string Supervisor = "Supervisor";
+
+    /// <summary>
+    /// Rol de Técnico de campo para atención de solicitudes de servicio.
+    /// </summary>
+    public const string Technician = "Técnico";
 }
 

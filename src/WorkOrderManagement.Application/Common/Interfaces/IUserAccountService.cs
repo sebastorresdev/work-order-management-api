@@ -95,5 +95,9 @@ public interface IUserAccountService
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Grupos de permisos asignados al usuario o errores.</returns>
     Task<ErrorOr<List<PermissionGroupResponse>>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken);
-}
 
+    /// <summary>
+    /// Obtiene los usuarios con rol Técnico, opcionalmente filtrados por sede.
+    /// </summary>
+    Task<ErrorOr<List<UserResponse>>> GetTechniciansAsync(Guid? branchId, CancellationToken cancellationToken);
+}
