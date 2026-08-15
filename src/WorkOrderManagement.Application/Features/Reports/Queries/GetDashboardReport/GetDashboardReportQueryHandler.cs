@@ -54,17 +54,17 @@ public class GetDashboardReportQueryHandler(
 
         baseQuery = WorkOrderQueryBuilder.ApplyScopeAndFilters(baseQuery, dummyGetQuery, accessScope);
 
-        // 3. Aplicar filtros de fecha si se especificaron
+        // 3. Aplicar filtros de fecha si se especificaron (convertidos a UTC para compatibilidad PostgreSQL/Npgsql)
         if (query.StartDate.HasValue)
         {
-            baseQuery = baseQuery.Where(w => w.Created >= query.StartDate.Value);
+            var startUtc = query.StartDate.Value.ToUniversalTime();
+            baseQuery = baseQuery.Where(w => w.Created >= startUtc);
         }
 
         if (query.EndDate.HasValue)
         {
-            // Ajustar al final del día
-            var endOfDay = query.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-            baseQuery = baseQuery.Where(w => w.Created <= endOfDay);
+            var endUtc = query.EndDate.Value.AddDays(1).AddTicks(-1).ToUniversalTime();
+            baseQuery = baseQuery.Where(w => w.Created <= endUtc);
         }
 
         var workOrders = await baseQuery.ToListAsync(cancellationToken);

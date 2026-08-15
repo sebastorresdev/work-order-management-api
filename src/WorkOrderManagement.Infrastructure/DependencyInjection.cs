@@ -26,6 +26,9 @@ public static class DependencyInjection
     /// <returns>El mismo <see cref="IHostApplicationBuilder"/> con la infraestructura configurada.</returns>
     public static IHostApplicationBuilder AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
+        // Habilitar compatibilidad con timestamps y zonas horarias en Npgsql/PostgreSQL
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         // Auditorías e Interceptores
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditTrailInterceptor>();

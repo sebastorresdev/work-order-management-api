@@ -54,13 +54,14 @@ public class ExportWorkOrdersQueryHandler(
 
         if (query.StartDate.HasValue)
         {
-            baseQuery = baseQuery.Where(w => w.Created >= query.StartDate.Value);
+            var startUtc = query.StartDate.Value.ToUniversalTime();
+            baseQuery = baseQuery.Where(w => w.Created >= startUtc);
         }
 
         if (query.EndDate.HasValue)
         {
-            var endOfDay = query.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-            baseQuery = baseQuery.Where(w => w.Created <= endOfDay);
+            var endUtc = query.EndDate.Value.AddDays(1).AddTicks(-1).ToUniversalTime();
+            baseQuery = baseQuery.Where(w => w.Created <= endUtc);
         }
 
         var list = await baseQuery.OrderByDescending(w => w.Created).ToListAsync(cancellationToken);
