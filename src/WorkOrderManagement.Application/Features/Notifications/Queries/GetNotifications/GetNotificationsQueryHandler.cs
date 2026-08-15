@@ -6,9 +6,15 @@ using WorkOrderManagement.Application.Features.Notifications.DTOs;
 
 namespace WorkOrderManagement.Application.Features.Notifications.Queries.GetNotifications;
 
+/// <summary>
+/// Manejador para obtener las notificaciones ordenadas cronológicamente para el usuario.
+/// </summary>
 public class GetNotificationsQueryHandler(IApplicationDbContext dbContext)
     : IQueryHandler<GetNotificationsQuery, ErrorOr<List<NotificationResponse>>>
 {
+    /// <summary>
+    /// Recupera las últimas 30 notificaciones asociadas al usuario autenticado.
+    /// </summary>
     public async Task<ErrorOr<List<NotificationResponse>>> HandleAsync(GetNotificationsQuery query, CancellationToken cancellationToken)
     {
         var notifications = await dbContext.Notifications

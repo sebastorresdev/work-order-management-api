@@ -10,8 +10,14 @@ using WorkOrderManagement.Application.Features.Notifications.Queries.GetNotifica
 
 namespace WorkOrderManagement.Api.Endpoints.Notifications;
 
+/// <summary>
+/// Mapeo de endpoints de la API HTTP para la gestión de notificaciones del usuario.
+/// </summary>
 public sealed class NotificationEndpoints : IEndpoint
 {
+    /// <summary>
+    /// Registra las rutas asociadas a notificaciones en el enrutador de ASP.NET Core.
+    /// </summary>
     public static void Map(RouteGroupBuilder group)
     {
         group.MapGet("/", GetNotifications)

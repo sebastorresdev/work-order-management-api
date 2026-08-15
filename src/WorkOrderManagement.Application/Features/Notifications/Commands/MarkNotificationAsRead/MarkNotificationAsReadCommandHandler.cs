@@ -5,9 +5,15 @@ using WorkOrderManagement.Application.Common.Messaging;
 
 namespace WorkOrderManagement.Application.Features.Notifications.Commands.MarkNotificationAsRead;
 
+/// <summary>
+/// Manejador para cambiar el estado de lectura de una notificación a verdadero.
+/// </summary>
 public class MarkNotificationAsReadCommandHandler(IApplicationDbContext dbContext)
     : ICommandHandler<MarkNotificationAsReadCommand, ErrorOr<Success>>
 {
+    /// <summary>
+    /// Marca la notificación especificada como leída.
+    /// </summary>
     public async Task<ErrorOr<Success>> HandleAsync(MarkNotificationAsReadCommand command, CancellationToken cancellationToken)
     {
         var notification = await dbContext.Notifications
